@@ -3,7 +3,25 @@
 Estilo de documentário de arquivo com narração em off. A tela nunca fica "vazia de informação": ou mostra o
 fato (material real), ou mostra onde ele aconteceu (mapa), ou mostra a prova (documento/número).
 
-## Paleta (`tema.ts`)
+## Temas: o visual muda com o assunto
+O fundo das cenas gráficas, as cores, as fontes e as molduras vêm do **tema** do vídeo. O tema é escolhido pelo
+roteiro com `scripts/detectar-tema.mjs` e vai no plano (`tema: 'guerra'`).
+
+| Tema | Quando | Visual |
+|---|---|---|
+| `guerra` | guerras, batalhas, armas, submarinos em guerra | **Sonar**: preto total, tela de sonar com varredura e eco azul-gelo (#B3DBFF), alvos em âmbar (#F2C48D), IBM Plex Sans fina e Plex Mono, documento em painel escuro |
+| `investigacao` | acidentes, aviação, crimes, mistérios, desastres, e quando nenhum tema se destaca | **Investigação visual**: grafite (#0B0C0E) com quadrícula de prancheta, etiqueta e grifo vermelhos (#FF4A2E), transcrição em papel com Plex Mono, Inter nos números |
+| `realeza` | reis, rainhas, impérios, famílias reais | vinho com damasco de flor-de-lis em ouro, filigrana nos cantos, Cinzel |
+| `ditadura` | ditadores, regimes, golpes, repressão | concreto escuro, raios de propaganda em vermelho, faixas vermelhas, Oswald e máquina de escrever |
+| `mar` | navios, naufrágios, exploração do mar | azul profundo, carta náutica, rosa dos ventos e ondas |
+| `antiguidade` | Roma, Egito, Grécia, medieval | pedra iluminada, terracota, meandro grego, Cinzel |
+| `guerraClassica`, `aviacao`, `crime`, `padrao` | só se pedir | fumaça e carta militar · radar e HUD · noir com persiana · azul-noite com estrelas |
+
+**O tema não substitui o material real.** Fotos e vídeos de arquivo continuam em tela cheia e devem ocupar 40 a 60% do
+tempo, intercalados com as cenas gráficas (arquivo → mapa → documento → arquivo). No arquivo, o tema só muda o filtro de
+cor (o sonar dessatura, a antiguidade puxa para o sépia), a cor da barra da legenda e as fontes.
+
+## Paleta do tema padrão (`tema.ts`)
 | Uso | Cor |
 |---|---|
 | Fundo dos cartões e gráficos (azul-noite com estrelas) | `#0c1420` → `#18243a` |

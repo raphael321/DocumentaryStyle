@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { AbsoluteFill, cancelRender, continueRender, delayRender, useCurrentFrame, useVideoConfig } from 'remotion';
-import { COR } from './tema';
+import { useTema } from './tema';
 import { carregarImagem, mola, surgir } from './base';
 import {
   Caixa,
@@ -38,6 +38,7 @@ const Satelite: React.FC<{
   largura: number;
   altura: number;
 }> = ({ camadas, retangulo, largura, altura }) => {
+  const T = useTema();
   const ref = useRef<HTMLCanvasElement>(null);
   const [imgs, setImgs] = useState<Record<string, HTMLImageElement>>({});
   const faltam = camadas.map((c) => c.src).filter((s) => !imgs[s]);
@@ -140,6 +141,7 @@ export const MapaReal: React.FC<PropsMapaReal> = ({
   medalhoes = [],
   rotulos = [],
 }) => {
+  const T = useTema();
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const seg = frame / fps;
@@ -183,7 +185,7 @@ export const MapaReal: React.FC<PropsMapaReal> = ({
               <path
                 key={`a${i}`}
                 d={caminhoEmGraus([a.pontos], true)}
-                fill={a.cor ?? COR.vermelho}
+                fill={a.cor ?? T.cor.vermelho}
                 fillOpacity={(a.opacidade ?? 0.45) * p}
                 stroke={a.borda ?? '#fff'}
                 strokeWidth={2}
@@ -201,7 +203,7 @@ export const MapaReal: React.FC<PropsMapaReal> = ({
                 <path
                   key={pd.iso}
                   d={f.d}
-                  fill={pd.cor ?? COR.vermelho}
+                  fill={pd.cor ?? T.cor.vermelho}
                   fillOpacity={(pd.opacidade ?? 0.72) * p}
                   stroke={pd.borda ?? '#ffffff'}
                   strokeWidth={2.2}
@@ -221,7 +223,7 @@ export const MapaReal: React.FC<PropsMapaReal> = ({
           const p = mola(frame, fps, c.aos ?? 0, 90, 14);
           const [x, y] = proj.tela([c.lon, c.lat]);
           const r = (c.raioKm / 111.32) * proj.ppd * p;
-          const cor = c.cor ?? COR.ouro;
+          const cor = c.cor ?? T.cor.ouro;
           return (
             <g key={`c${i}`} opacity={Math.min(1, p)}>
               <circle cx={x} cy={y} r={Math.max(0, r)} fill={cor} fillOpacity={0.12} stroke={cor} strokeWidth={4} strokeDasharray="14 10" strokeDashoffset={-frame * 1.2} />
@@ -231,12 +233,12 @@ export const MapaReal: React.FC<PropsMapaReal> = ({
         {rotas.map((r, i) => {
           const pts = amostrarCurva(r.pontos.map(proj.tela), r.curva ?? 0.12);
           const p = surgir(frame, fps, r.aos ?? 0, r.dur ?? 2);
-          return <LinhaAnimada key={`r${i}`} pontos={pts} p={p} cor={r.cor ?? COR.branco} largura={r.largura ?? 3} tracejado={r.tracejado ?? true} icone={r.icone} selo={r.selo} />;
+          return <LinhaAnimada key={`r${i}`} pontos={pts} p={p} cor={r.cor ?? T.cor.branco} largura={r.largura ?? 3} tracejado={r.tracejado ?? true} icone={r.icone} selo={r.selo} />;
         })}
         {setas.map((s, i) => {
           const pts = amostrarCurva([proj.tela(s.de), proj.tela(s.para)], s.curva ?? 0.15);
           const p = surgir(frame, fps, s.aos ?? 0, s.dur ?? 1.2);
-          return <LinhaAnimada key={`s${i}`} pontos={pts} p={p} cor={s.cor ?? COR.ouro} largura={s.largura ?? 12} tracejado={false} ponta icone={s.icone} />;
+          return <LinhaAnimada key={`s${i}`} pontos={pts} p={p} cor={s.cor ?? T.cor.ouro} largura={s.largura ?? 12} tracejado={false} ponta icone={s.icone} />;
         })}
       </svg>
 

@@ -1,7 +1,7 @@
 // Marcadores desenhados em coordenadas de TELA (não crescem com o zoom do mapa).
 import React from 'react';
 import { Img } from 'remotion';
-import { COR, FONTE, SOMBRA_TEXTO } from './tema';
+import { SOMBRA_TEXTO, useTema } from './tema';
 import { arquivo } from './base';
 import { Ponto, caminhoTela, cortarLinha } from './geo';
 
@@ -62,7 +62,9 @@ export const Icone: React.FC<{
   /** selo claro com borda colorida atrás do ícone: sem ele, tanque/caminhão somem em cima do satélite */
   selo?: boolean;
   cor?: string;
-}> = ({ nome, x, y, angulo, escala = 1, selo = nome === 'tanque' || nome === 'caminhao' || nome === 'soldado', cor = COR.ouro }) => {
+}> = ({ nome, x, y, angulo, escala = 1, selo = nome === 'tanque' || nome === 'caminhao' || nome === 'soldado', cor: corProp }) => {
+  const T = useTema();
+  const cor = corProp ?? T.cor.ouro;
   const graus = (angulo * 180) / Math.PI;
   const espelhar = Math.abs(graus) > 90; // mantém navio/tanque "em pé" quando vai para a esquerda
   const rot = espelhar ? graus - 180 : graus;
@@ -101,7 +103,9 @@ export const LinhaAnimada: React.FC<{
   icone?: string;
   ponta?: boolean;
   selo?: boolean;
-}> = ({ pontos, p, cor = COR.branco, largura = 3, tracejado = true, icone, ponta = false, selo }) => {
+}> = ({ pontos, p, cor: corProp, largura = 3, tracejado = true, icone, ponta = false, selo }) => {
+  const T = useTema();
+  const cor = corProp ?? T.cor.branco;
   if (p <= 0 || pontos.length < 2) return null;
   const { pontos: parte, angulo } = cortarLinha(pontos, p);
   const d = caminhoTela(parte);
@@ -145,7 +149,9 @@ export const Pino: React.FC<{
   bandeira?: string;
   pulso?: number; // 0..1 fase do pulso
   lado?: 'baixo' | 'direita' | 'cima' | 'esquerda';
-}> = ({ x, y, p, rotulo, sub, cor = COR.vermelho, bandeira, pulso = 0, lado = 'baixo' }) => {
+}> = ({ x, y, p, rotulo, sub, cor: corProp, bandeira, pulso = 0, lado = 'baixo' }) => {
+  const T = useTema();
+  const cor = corProp ?? T.cor.vermelho;
   if (p <= 0) return null;
   const tam = bandeira ? 58 : 18;
   const posTexto: React.CSSProperties =
@@ -192,9 +198,9 @@ export const Pino: React.FC<{
       </div>
       {rotulo && (
         <div style={{ position: 'absolute', whiteSpace: 'nowrap', opacity: p, ...posTexto }}>
-          <div style={{ fontFamily: FONTE.sans, fontWeight: 700, fontSize: 27, color: COR.branco, textShadow: SOMBRA_TEXTO }}>{rotulo}</div>
+          <div style={{ fontFamily: T.fonte.sans, fontWeight: 700, fontSize: 27, color: T.cor.branco, textShadow: SOMBRA_TEXTO }}>{rotulo}</div>
           {sub && (
-            <div style={{ fontFamily: FONTE.serif, fontStyle: 'italic', fontSize: 21, color: 'rgba(246,242,233,0.9)', textShadow: SOMBRA_TEXTO }}>
+            <div style={{ fontFamily: T.fonte.serif, fontStyle: 'italic', fontSize: 21, color: 'rgba(246,242,233,0.9)', textShadow: SOMBRA_TEXTO }}>
               {sub}
             </div>
           )}
@@ -211,10 +217,12 @@ export const Medalhao: React.FC<{ x: number; y: number; p: number; foto: string;
   p,
   foto,
   nome,
-  cor = COR.vermelho,
+  cor: corProp,
   tamanho = 118,
   pb = true,
 }) => {
+  const T = useTema();
+  const cor = corProp ?? T.cor.vermelho;
   if (p <= 0) return null;
   return (
     <>
@@ -243,11 +251,11 @@ export const Medalhao: React.FC<{ x: number; y: number; p: number; foto: string;
             top: y + tamanho / 2 + 16,
             transform: 'translateX(-50%)',
             whiteSpace: 'nowrap',
-            fontFamily: FONTE.serif,
+            fontFamily: T.fonte.serif,
             fontVariant: 'small-caps',
             letterSpacing: 2,
             fontSize: 28,
-            color: COR.branco,
+            color: T.cor.branco,
             textShadow: SOMBRA_TEXTO,
             opacity: p,
           }}
@@ -268,6 +276,7 @@ export const Rotulo: React.FC<{ x: number; y: number; p: number; texto: string; 
   sub,
   tamanho = 34,
 }) => {
+  const T = useTema();
   if (p <= 0) return null;
   return (
     <div
@@ -281,11 +290,11 @@ export const Rotulo: React.FC<{ x: number; y: number; p: number; texto: string; 
         whiteSpace: 'nowrap',
       }}
     >
-      <div style={{ fontFamily: FONTE.serif, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 4, fontSize: tamanho, color: COR.branco, textShadow: SOMBRA_TEXTO }}>
+      <div style={{ fontFamily: T.fonte.titulo, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 4, fontSize: tamanho, color: T.cor.branco, textShadow: SOMBRA_TEXTO }}>
         {texto}
       </div>
       {sub && (
-        <div style={{ fontFamily: FONTE.serif, fontStyle: 'italic', fontSize: tamanho * 0.62, color: 'rgba(246,242,233,0.92)', textShadow: SOMBRA_TEXTO }}>{sub}</div>
+        <div style={{ fontFamily: T.fonte.serif, fontStyle: 'italic', fontSize: tamanho * 0.62, color: 'rgba(246,242,233,0.92)', textShadow: SOMBRA_TEXTO }}>{sub}</div>
       )}
     </div>
   );

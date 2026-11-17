@@ -1,7 +1,7 @@
 import React from 'react';
 import { AbsoluteFill, Img, OffthreadVideo, interpolate, useCurrentFrame, useVideoConfig } from 'remotion';
-import { COR, FONTE } from './tema';
-import { Granulacao, arquivo, mola } from './base';
+import { useTema } from './tema';
+import { Granulacao, OrnamentoCartao, arquivo, mola } from './base';
 import { Credito, Legenda } from './Textos';
 
 type Enquadramento = { escala: number; x: number; y: number };
@@ -33,8 +33,10 @@ export const Arquivo: React.FC<{
   kenBurns,
   legenda,
   credito,
-  graos = 0.07,
+  graos: graosProp,
 }) => {
+  const T = useTema();
+  const graos = graosProp ?? T.graos;
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
   const ehVideo = tipo ? tipo === 'video' : /\.(mp4|webm|mov|mkv)$/i.test(src);
@@ -43,7 +45,7 @@ export const Arquivo: React.FC<{
   const escala = kb ? kb.de.escala + (kb.para.escala - kb.de.escala) * p : 1;
   const x = kb ? kb.de.x + (kb.para.x - kb.de.x) * p : 0;
   const y = kb ? kb.de.y + (kb.para.y - kb.de.y) * p : 0;
-  const filtro = pb ? 'grayscale(1) contrast(1.08)' : 'saturate(0.92) contrast(1.04)';
+  const filtro = pb ? 'grayscale(1) contrast(1.08)' : T.filtroArquivo;
 
   const midia = (fit: 'cover' | 'contain', extra: React.CSSProperties = {}) =>
     ehVideo ? (
@@ -89,6 +91,7 @@ export const FotoMoldura: React.FC<{
   pb?: boolean;
   aos?: number;
 }> = ({ src, legenda, sub, credito, rotacao = -2, largura = 760, x = 50, y = 50, pb = false, aos = 0.05 }) => {
+  const T = useTema();
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
   const entrada = mola(frame, fps, aos, 130, 15);
@@ -103,29 +106,30 @@ export const FotoMoldura: React.FC<{
           width: largura,
           transform: `translate(-50%, -50%) translateY(${(1 - entrada) * 60}px) rotate(${rotacao + (1 - entrada) * 4}deg) scale(${0.94 + entrada * 0.06 + deriva * 0.03})`,
           opacity: entrada,
-          background: COR.papel,
+          background: T.cor.papel,
           padding: '18px 18px 0',
           boxShadow: '0 30px 70px rgba(0,0,0,0.6)',
-          border: `1px solid ${COR.papelBorda}`,
+          border: `1px solid ${T.cor.papelBorda}`,
         }}
       >
         <div style={{ width: '100%', aspectRatio: '4 / 3', overflow: 'hidden', background: '#222' }}>
           <Img
             src={arquivo(src)}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', filter: pb ? 'grayscale(1) contrast(1.1)' : 'saturate(0.9)' }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', filter: pb ? 'grayscale(1) contrast(1.1)' : T.filtroArquivo }}
           />
         </div>
         <div style={{ padding: '14px 6px 16px', textAlign: 'center' }}>
           {legenda && (
-            <div style={{ fontFamily: FONTE.serif, fontVariant: 'small-caps', letterSpacing: 2, fontSize: 30, color: COR.tinta }}>
+            <div style={{ fontFamily: T.fonte.titulo, fontVariant: 'small-caps', letterSpacing: 2, fontSize: 30, color: T.cor.tinta }}>
               {legenda}
             </div>
           )}
-          {sub && <div style={{ fontFamily: FONTE.serif, fontStyle: 'italic', fontSize: 22, color: COR.tintaSuave }}>{sub}</div>}
+          {sub && <div style={{ fontFamily: T.fonte.serif, fontStyle: 'italic', fontSize: 22, color: T.cor.tintaSuave }}>{sub}</div>}
           {credito && (
-            <div style={{ fontFamily: FONTE.sans, fontSize: 13, color: COR.tintaSuave, marginTop: 6, textAlign: 'right' }}>{credito}</div>
+            <div style={{ fontFamily: T.fonte.sans, fontSize: 13, color: T.cor.tintaSuave, marginTop: 6, textAlign: 'right' }}>{credito}</div>
           )}
         </div>
+        <OrnamentoCartao />
       </div>
     </AbsoluteFill>
   );

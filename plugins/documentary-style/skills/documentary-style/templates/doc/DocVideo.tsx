@@ -7,6 +7,7 @@ import { MapaReal } from './MapaReal';
 import { GloboReal } from './GloboReal';
 import { ComparacaoBarras, LinhaDoTempo, NumeroGrande } from './Graficos';
 import { QuadroConexoes } from './QuadroConexoes';
+import { EscolhaTema, ProvedorTema } from './tema';
 
 type P<C extends React.FC<any>> = React.ComponentProps<C>;
 type Tempo = { inicio?: number; duracao?: number };
@@ -33,12 +34,22 @@ export type CenaPlano = {
   duracao: number;
   /** narração da cena, ex.: 'fornovo/cena3.mp3' (dentro de public/) */
   audio?: string;
-  /** 'doc' = azul-noite com estrelas (padrão), 'preto' ou 'nenhum' */
+  /** 'doc' = fundo do tema (padrão), 'preto' ou 'nenhum' */
   fundo?: 'doc' | 'preto' | 'nenhum';
+  /** troca o tema só nesta cena (ex.: uma cena sobre o rei num vídeo de guerra) */
+  tema?: EscolhaTema;
+  /** false tira a moldura do tema (cantos, faixas) desta cena */
+  moldura?: boolean;
   blocos: Bloco[];
 };
 
 export type Plano = {
+  /**
+   * Visual do vídeo: 'padrao' | 'guerra' | 'realeza' | 'ditadura' | 'aviacao' | 'mar' | 'antiguidade' | 'crime',
+   * ou { base: 'realeza', cor: { ouro: '#...' } } para personalizar.
+   * Descubra o tema do roteiro com scripts/detectar-tema.mjs.
+   */
+  tema?: EscolhaTema;
   cenas: CenaPlano[];
   /** fusão entre cenas, em segundos (padrão 0.4) */
   fusao?: number;
@@ -87,8 +98,9 @@ export const DocVideo: React.FC<{ plano: Plano }> = ({ plano }) => {
         return (
           <React.Fragment key={cena.id}>
             <Sequence from={de} durationInFrames={durVisual} name={`cena ${cena.id}`}>
+              <ProvedorTema tema={cena.tema ?? plano.tema}>
               <EntradaCena fusao={i === 0 ? 0 : fusao}>
-                {(cena.fundo ?? 'doc') === 'doc' && <FundoDoc semente={cena.id} />}
+                {(cena.fundo ?? 'doc') === 'doc' && <FundoDoc semente={cena.id} moldura={cena.moldura ?? true} />}
                 {cena.fundo === 'preto' && <AbsoluteFill style={{ backgroundColor: '#000' }} />}
                 {cena.blocos.map((b, j) => {
                   const C = RENDER[b.tipo];
@@ -101,6 +113,7 @@ export const DocVideo: React.FC<{ plano: Plano }> = ({ plano }) => {
                   );
                 })}
               </EntradaCena>
+              </ProvedorTema>
             </Sequence>
             {cena.audio && (
               <Sequence from={de} durationInFrames={durAudio} name={`voz ${cena.id}`}>

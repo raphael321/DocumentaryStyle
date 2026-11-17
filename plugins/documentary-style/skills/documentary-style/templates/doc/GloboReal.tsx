@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useMemo, useRef } from 'react';
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion';
-import { COR } from './tema';
+import { useTema } from './tema';
 import { carregarImagem, mola, surgir, useRecurso } from './base';
 import { LonLat, QuadroGlobo, TEXTURA_TERRA, globoNoTempo, usePaises } from './geo';
 import { Pino } from './Marcadores';
@@ -54,6 +54,7 @@ export type PropsGlobo = {
 
 /** GLOBO 3D com a textura de satélite real, girando e aproximando. Bom para abrir e trocar de continente. */
 export const GloboReal: React.FC<PropsGlobo> = ({ camera, textura = TEXTURA_TERRA, paises = [], pinos = [], arcos = [] }) => {
+  const T = useTema();
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const ref = useRef<HTMLCanvasElement>(null);
@@ -146,7 +147,7 @@ export const GloboReal: React.FC<PropsGlobo> = ({ camera, textura = TEXTURA_TERR
           ctx.closePath();
         }
         ctx.globalAlpha = (pd.opacidade ?? 0.72) * p;
-        ctx.fillStyle = pd.cor ?? COR.vermelho;
+        ctx.fillStyle = pd.cor ?? T.cor.vermelho;
         ctx.fill('evenodd');
         ctx.globalAlpha = p;
         ctx.strokeStyle = '#fff';

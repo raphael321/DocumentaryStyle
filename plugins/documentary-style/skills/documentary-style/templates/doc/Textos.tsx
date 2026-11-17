@@ -1,10 +1,11 @@
 import React from 'react';
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion';
-import { COR, FONTE, SOMBRA_TEXTO } from './tema';
-import { mola, surgir } from './base';
+import { SOMBRA_TEXTO, useTema } from './tema';
+import { OrnamentoCartao, mola, surgir } from './base';
 
 /** Legenda de lugar no canto inferior esquerdo: barra dourada + LOCAL + data. */
 export const Legenda: React.FC<{ local: string; data?: string; aos?: number }> = ({ local, data, aos = 0.3 }) => {
+  const T = useTema();
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const barra = surgir(frame, fps, aos, 0.35);
@@ -12,15 +13,15 @@ export const Legenda: React.FC<{ local: string; data?: string; aos?: number }> =
   return (
     <AbsoluteFill style={{ pointerEvents: 'none' }}>
       <div style={{ position: 'absolute', left: 84, bottom: 104, display: 'flex', alignItems: 'stretch', gap: 18 }}>
-        <div style={{ width: 6, background: COR.ouro, transform: `scaleY(${barra})`, transformOrigin: 'bottom' }} />
+        <div style={{ width: 6, background: T.cor.ouro, transform: `scaleY(${barra})`, transformOrigin: 'bottom' }} />
         <div style={{ opacity: texto, transform: `translateX(${(1 - texto) * -24}px)` }}>
           <div
             style={{
-              fontFamily: FONTE.sans,
+              fontFamily: T.fonte.sans,
               fontWeight: 800,
               fontSize: 34,
               letterSpacing: 0.5,
-              color: COR.branco,
+              color: T.cor.branco,
               textTransform: 'uppercase',
               textShadow: SOMBRA_TEXTO,
               lineHeight: 1.1,
@@ -31,7 +32,7 @@ export const Legenda: React.FC<{ local: string; data?: string; aos?: number }> =
           {data && (
             <div
               style={{
-                fontFamily: FONTE.serif,
+                fontFamily: T.fonte.serif,
                 fontStyle: 'italic',
                 fontSize: 25,
                 color: 'rgba(246,242,233,0.88)',
@@ -49,14 +50,16 @@ export const Legenda: React.FC<{ local: string; data?: string; aos?: number }> =
 };
 
 /** Crédito da fonte do material, pequeno, no canto inferior direito. Obrigatório em todo arquivo. */
-export const Credito: React.FC<{ texto: string }> = ({ texto }) => (
+export const Credito: React.FC<{ texto: string }> = ({ texto }) => {
+  const T = useTema();
+  return (
   <AbsoluteFill style={{ pointerEvents: 'none' }}>
     <div
       style={{
         position: 'absolute',
         right: 40,
         bottom: 30,
-        fontFamily: FONTE.sans,
+        fontFamily: T.fonte.sans,
         fontSize: 15,
         color: 'rgba(246,242,233,0.62)',
         textShadow: '0 1px 3px rgba(0,0,0,0.9)',
@@ -65,13 +68,15 @@ export const Credito: React.FC<{ texto: string }> = ({ texto }) => (
       {texto}
     </div>
   </AbsoluteFill>
-);
+  );
+};
 
 /**
  * Texto com trechos marcados entre [[colchetes duplos]].
  * Os trechos marcados ganham marca-texto amarelo animado a partir de `aosMarca`.
  */
 const TextoMarcado: React.FC<{ texto: string; revelar: number; marca: number }> = ({ texto, revelar, marca }) => {
+  const T = useTema();
   const partes = texto.split(/(\[\[[^\]]+\]\])/g).filter(Boolean);
   const totalPalavras = texto.replace(/\[\[|\]\]/g, '').split(/\s+/).filter(Boolean).length;
   let contador = 0;
@@ -96,7 +101,7 @@ const TextoMarcado: React.FC<{ texto: string; revelar: number; marca: number }> 
           <span
             key={i}
             style={{
-              backgroundImage: `linear-gradient(${COR.marcaTexto}, ${COR.marcaTexto})`,
+              backgroundImage: `linear-gradient(${T.cor.marcaTexto}, ${T.cor.marcaTexto})`,
               backgroundRepeat: 'no-repeat',
               backgroundSize: `${marca * 100}% 62%`,
               backgroundPosition: '0 78%',
@@ -126,6 +131,7 @@ export const CartaoDocumento: React.FC<{
   largura?: number;
   tamanhoTexto?: number;
 }> = ({ cabecalho, texto, credito, carimbo, aosMarca, largura = 1180, tamanhoTexto = 44 }) => {
+  const T = useTema();
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const entrada = mola(frame, fps, 0.05, 140, 18);
@@ -133,29 +139,29 @@ export const CartaoDocumento: React.FC<{
   const tempoMarca = aosMarca ?? 0.35 + Math.max(0.8, texto.length / 70) + 0.2;
   const marca = surgir(frame, fps, tempoMarca, 0.5);
   const batida = carimbo ? mola(frame, fps, carimbo.aos, 260, 16) : 0;
-  const corCarimbo = carimbo?.cor ?? COR.vermelho;
+  const corCarimbo = carimbo?.cor ?? T.cor.vermelho;
   return (
     <AbsoluteFill style={{ alignItems: 'center', justifyContent: 'center' }}>
       <div
         style={{
           width: largura,
           position: 'relative',
-          background: `linear-gradient(180deg, #f7f1e3 0%, ${COR.papel} 100%)`,
-          border: `1px solid ${COR.papelBorda}`,
-          boxShadow: '0 30px 60px rgba(0,0,0,0.55), inset 0 0 40px rgba(160,130,70,0.18)',
+          background: `linear-gradient(180deg, ${T.cor.papelClaro} 0%, ${T.cor.papel} 100%)`,
+          border: `1px solid ${T.cor.papelBorda}`,
+          boxShadow: T.papelEscuro ? `0 30px 60px rgba(0,0,0,0.7), 0 0 30px ${T.cor.azul}22` : '0 30px 60px rgba(0,0,0,0.55), inset 0 0 40px rgba(160,130,70,0.18)',
           padding: '34px 54px 26px',
           opacity: entrada,
           transform: `translateY(${(1 - entrada) * 30}px) scale(${0.96 + entrada * 0.04})`,
         }}
       >
-        <div style={{ position: 'absolute', inset: 8, border: `1px solid rgba(150,125,75,0.35)`, pointerEvents: 'none' }} />
+        {!T.papelEscuro && <div style={{ position: 'absolute', inset: 8, border: `1px solid rgba(150,125,75,0.35)`, pointerEvents: 'none' }} />}
         <div
           style={{
-            fontFamily: FONTE.serif,
+            fontFamily: T.fonte.titulo,
             fontVariant: 'small-caps',
             letterSpacing: 2.5,
             fontSize: 23,
-            color: COR.tintaSuave,
+            color: T.cor.tintaSuave,
             textAlign: 'center',
             marginBottom: 18,
           }}
@@ -164,21 +170,22 @@ export const CartaoDocumento: React.FC<{
         </div>
         <div
           style={{
-            fontFamily: FONTE.serif,
-            fontStyle: 'italic',
-            fontSize: tamanhoTexto,
+            fontFamily: T.fonte.documento,
+            fontStyle: T.documentoItalico ? 'italic' : 'normal',
+            fontSize: T.documentoItalico ? tamanhoTexto : tamanhoTexto * 0.86,
             lineHeight: 1.32,
-            color: COR.tinta,
+            color: T.cor.tinta,
           }}
         >
           <TextoMarcado texto={texto} revelar={revelar} marca={marca} />
         </div>
+        <OrnamentoCartao />
         {credito && (
           <div
             style={{
-              fontFamily: FONTE.sans,
+              fontFamily: T.fonte.sans,
               fontSize: 15,
-              color: COR.tintaSuave,
+              color: T.cor.tintaSuave,
               textAlign: 'right',
               marginTop: 18,
               opacity: revelar,
@@ -199,14 +206,14 @@ export const CartaoDocumento: React.FC<{
               borderRadius: 8,
               padding: '6px 22px',
               color: corCarimbo,
-              fontFamily: FONTE.sans,
+              fontFamily: T.fonte.sans,
               fontWeight: 800,
               fontSize: 46,
               letterSpacing: 2,
               textTransform: 'uppercase',
               whiteSpace: 'nowrap',
-              background: 'rgba(243,236,220,0.35)',
-              mixBlendMode: 'multiply',
+              background: T.papelEscuro ? 'rgba(0,0,0,0.55)' : 'rgba(243,236,220,0.35)',
+              mixBlendMode: T.papelEscuro ? 'normal' : 'multiply',
             }}
           >
             {carimbo.texto}

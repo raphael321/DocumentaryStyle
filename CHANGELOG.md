@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.0 (2026-11-17)
+- Novo: **temas por assunto**. `scripts/detectar-tema.mjs` lê o roteiro/briefing e escolhe o tema; o plano recebe `tema`.
+- `guerra` usa o estilo **Sonar** (preto, varredura e eco azul-gelo, alvos em âmbar, documento em painel escuro).
+- `investigacao` usa o estilo **Investigação visual** (grafite, quadrícula, etiqueta e grifo vermelhos, transcrição em papel).
+  É o tema de acidentes, aviação, crimes e mistérios, e o padrão quando nenhum assunto se destaca.
+- Mais temas: `realeza` (damasco e filigrana), `ditadura` (concreto e propaganda), `mar` (carta náutica), `antiguidade`
+  (pedra e meandro), e sob pedido `guerraClassica`, `aviacao`, `crime`.
+- Tema por cena (`cena.tema`), personalização (`{ base, cor, fonte, fundo, ornamento }`) e `cena.moldura: false`.
+- Os componentes leem as cores e fontes com `useTema()`. `COR`/`FONTE` continuam valendo (cores do tema padrão).
+- O arquivo real não muda: o tema só ajusta filtro, granulação, legenda e fontes por cima dele.
+- Testado com stills de documento, número, quadro de ligações, barras e arquivo em todos os temas (Remotion 4.0.540).
+
 ## 0.1.2 (2026-11-17)
 - Corrigido: o render do vídeo inteiro caía na cena do mapa com `terra-hd.jpg` (a aba do navegador estourava a memória).
 - Novo `scripts/blocos-hd.mjs`: corta o HD em 32 blocos de 45° (2700 px). `baixar-mapas.mjs --hd` já roda o corte.

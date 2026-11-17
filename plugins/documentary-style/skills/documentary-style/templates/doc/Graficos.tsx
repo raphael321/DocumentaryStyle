@@ -1,14 +1,17 @@
 import React from 'react';
 import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from 'remotion';
-import { COR, FONTE, SOMBRA_TEXTO } from './tema';
+import { SOMBRA_TEXTO, useTema } from './tema';
 import { mola, surgir } from './base';
 
-const Titulo: React.FC<{ texto: string; p: number }> = ({ texto, p }) => (
-  <div style={{ textAlign: 'center', opacity: p }}>
-    <div style={{ width: 70 * p, height: 3, background: COR.ouro, margin: '0 auto 18px' }} />
-    <div style={{ fontFamily: FONTE.serif, fontWeight: 500, textTransform: 'uppercase', letterSpacing: 5, fontSize: 38, color: COR.branco }}>{texto}</div>
-  </div>
-);
+const Titulo: React.FC<{ texto: string; p: number }> = ({ texto, p }) => {
+  const T = useTema();
+  return (
+    <div style={{ textAlign: 'center', opacity: p }}>
+      <div style={{ width: 70 * p, height: 3, background: T.cor.ouro, margin: '0 auto 18px' }} />
+      <div style={{ fontFamily: T.fonte.titulo, fontWeight: 500, textTransform: 'uppercase', letterSpacing: 5, fontSize: 38, color: T.cor.branco }}>{texto}</div>
+    </div>
+  );
+};
 
 const formatar = (v: number, casas: number) => v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas });
 
@@ -20,10 +23,11 @@ export const ComparacaoBarras: React.FC<{
   casas?: number;
   maximo?: number;
 }> = ({ titulo, itens, fonte, casas = 0, maximo }) => {
+  const T = useTema();
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const max = maximo ?? Math.max(...itens.map((i) => i.valor));
-  const cores = [COR.vermelho, COR.azul, COR.ouro, COR.verde];
+  const cores = [T.cor.vermelho, T.cor.azul, T.cor.ouro, T.cor.verde];
   return (
     <AbsoluteFill style={{ alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ width: 1100 }}>
@@ -34,7 +38,7 @@ export const ComparacaoBarras: React.FC<{
             const largura = (it.valor / max) * 640 * p;
             return (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 24, opacity: Math.min(1, p * 3) }}>
-                <div style={{ width: 300, textAlign: 'right', fontFamily: FONTE.sans, fontWeight: 700, fontSize: 30, color: COR.branco }}>{it.rotulo}</div>
+                <div style={{ width: 300, textAlign: 'right', fontFamily: T.fonte.sans, fontWeight: 700, fontSize: 30, color: T.cor.branco }}>{it.rotulo}</div>
                 <div
                   style={{
                     width: largura,
@@ -44,7 +48,7 @@ export const ComparacaoBarras: React.FC<{
                     boxShadow: `0 0 24px ${it.cor ?? cores[i % 4]}66`,
                   }}
                 />
-                <div style={{ fontFamily: FONTE.sans, fontWeight: 800, fontSize: 40, color: COR.branco, textShadow: SOMBRA_TEXTO }}>
+                <div style={{ fontFamily: T.fonte.sans, fontWeight: 800, fontSize: 40, color: T.cor.branco, textShadow: SOMBRA_TEXTO }}>
                   {it.prefixo ?? ''}
                   {formatar(it.valor * p, casas)}
                   {it.sufixo ?? ''}
@@ -54,7 +58,7 @@ export const ComparacaoBarras: React.FC<{
           })}
         </div>
         {fonte && (
-          <div style={{ marginTop: 44, textAlign: 'center', fontFamily: FONTE.sans, fontSize: 18, color: 'rgba(246,242,233,0.6)', opacity: surgir(frame, fps, 1.4, 0.5) }}>
+          <div style={{ marginTop: 44, textAlign: 'center', fontFamily: T.fonte.sans, fontSize: 18, color: 'rgba(246,242,233,0.6)', opacity: surgir(frame, fps, 1.4, 0.5) }}>
             {fonte}
           </div>
         )}
@@ -72,7 +76,9 @@ export const NumeroGrande: React.FC<{
   sub?: string;
   contarDe?: number;
   cor?: string;
-}> = ({ rotulo, numero, prefixo = '', sufixo = '', sub, contarDe = 0, cor = COR.branco }) => {
+}> = ({ rotulo, numero, prefixo = '', sufixo = '', sub, contarDe = 0, cor: corProp }) => {
+  const T = useTema();
+  const cor = corProp ?? T.cor.branco;
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const p = surgir(frame, fps, 0.4, 1.4);
@@ -86,7 +92,7 @@ export const NumeroGrande: React.FC<{
       <Titulo texto={rotulo} p={surgir(frame, fps, 0, 0.5)} />
       <div
         style={{
-          fontFamily: FONTE.sans,
+          fontFamily: T.fonte.sans,
           fontWeight: 800,
           fontSize: 150,
           color: cor,
@@ -99,9 +105,9 @@ export const NumeroGrande: React.FC<{
       >
         {texto}
       </div>
-      <div style={{ width: 600 * surgir(frame, fps, 0.6, 0.6), height: 3, background: COR.ouro }} />
+      <div style={{ width: 600 * surgir(frame, fps, 0.6, 0.6), height: 3, background: T.cor.ouro }} />
       {sub && (
-        <div style={{ marginTop: 22, fontFamily: FONTE.sans, fontSize: 24, color: 'rgba(246,242,233,0.72)', opacity: surgir(frame, fps, 1.0, 0.5), maxWidth: 1100, textAlign: 'center' }}>
+        <div style={{ marginTop: 22, fontFamily: T.fonte.sans, fontSize: 24, color: 'rgba(246,242,233,0.72)', opacity: surgir(frame, fps, 1.0, 0.5), maxWidth: 1100, textAlign: 'center' }}>
           {sub}
         </div>
       )}
@@ -123,6 +129,7 @@ export const LinhaDoTempo: React.FC<{
   modo?: 'regua' | 'selo';
   dur?: number;
 }> = ({ de, para, inicio, fim, passo, local, modo = 'regua', dur = 1.6 }) => {
+  const T = useTema();
   const frame = useCurrentFrame();
   const { fps, width } = useVideoConfig();
   const p = surgir(frame, fps, 0.2, dur);
@@ -137,11 +144,11 @@ export const LinhaDoTempo: React.FC<{
   return (
     <AbsoluteFill style={{ pointerEvents: 'none', opacity: entrada }}>
       <div style={{ position: 'absolute', top: 70, left: 0, width, textAlign: 'center' }}>
-        <div style={{ fontFamily: FONTE.serif, fontWeight: 600, fontSize: modo === 'selo' ? 76 : 92, color: COR.branco, textShadow: SOMBRA_TEXTO, lineHeight: 1 }}>
+        <div style={{ fontFamily: T.fonte.titulo, fontWeight: 600, fontSize: modo === 'selo' ? 76 : 92, color: T.cor.branco, textShadow: SOMBRA_TEXTO, lineHeight: 1 }}>
           {Math.round(anoAtual)}
         </div>
         {local && (
-          <div style={{ marginTop: 8, fontFamily: FONTE.sans, fontWeight: 700, fontSize: 22, letterSpacing: 4, color: COR.branco, textTransform: 'uppercase', textShadow: SOMBRA_TEXTO }}>
+          <div style={{ marginTop: 8, fontFamily: T.fonte.sans, fontWeight: 700, fontSize: 22, letterSpacing: 4, color: T.cor.branco, textTransform: 'uppercase', textShadow: SOMBRA_TEXTO }}>
             {local}
           </div>
         )}
@@ -156,13 +163,13 @@ export const LinhaDoTempo: React.FC<{
                 <div key={a} style={{ position: 'absolute', left: (a - a0) * pxPorAno, top: grande ? 10 : 15 }}>
                   <div style={{ width: 1, height: grande ? 20 : 10, background: 'rgba(246,242,233,0.7)' }} />
                   {grande && (
-                    <div style={{ position: 'absolute', top: 24, left: 0, transform: 'translateX(-50%)', fontFamily: FONTE.sans, fontSize: 16, color: 'rgba(246,242,233,0.75)' }}>{a}</div>
+                    <div style={{ position: 'absolute', top: 24, left: 0, transform: 'translateX(-50%)', fontFamily: T.fonte.sans, fontSize: 16, color: 'rgba(246,242,233,0.75)' }}>{a}</div>
                   )}
                 </div>
               );
             })}
           </div>
-          <div style={{ position: 'absolute', left: 520 - 7, top: 4, width: 0, height: 0, borderLeft: '7px solid transparent', borderRight: '7px solid transparent', borderTop: `12px solid ${COR.ouro}` }} />
+          <div style={{ position: 'absolute', left: 520 - 7, top: 4, width: 0, height: 0, borderLeft: '7px solid transparent', borderRight: '7px solid transparent', borderTop: `12px solid ${T.cor.ouro}` }} />
         </div>
       )}
     </AbsoluteFill>

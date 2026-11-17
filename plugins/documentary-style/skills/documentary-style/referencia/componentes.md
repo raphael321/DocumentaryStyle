@@ -5,12 +5,23 @@ Tempos (`aos`, `dur`, `t`) são **segundos contados a partir do início do bloco
 
 ## DocVideo + Plano
 ```ts
-type Plano = { cenas: CenaPlano[]; fusao?: number /*0.4*/; trilha?: { src: string; volume?: number } };
-type CenaPlano = { id: string; duracao: number; audio?: string; fundo?: 'doc' | 'preto' | 'nenhum'; blocos: Bloco[] };
+type Plano = { tema?: EscolhaTema; cenas: CenaPlano[]; fusao?: number /*0.4*/; trilha?: { src: string; volume?: number } };
+type CenaPlano = { id: string; duracao: number; audio?: string; fundo?: 'doc' | 'preto' | 'nenhum'; tema?: EscolhaTema;
+                   moldura?: boolean /*true*/; blocos: Bloco[] };
+type EscolhaTema = 'padrao' | 'guerra' | 'investigacao' | 'realeza' | 'ditadura' | 'mar' | 'antiguidade'
+                 | 'guerraClassica' | 'aviacao' | 'crime'
+                 | { base: TemaId; cor?: {...}; fonte?: {...}; fundo?: EstiloFundo; ornamento?: EstiloOrnamento; filtroArquivo?: string; graos?: number };
 type Bloco = { tipo: 'arquivo'|'foto'|'documento'|'mapa'|'globo'|'barras'|'numero'|'linhaTempo'|'conexoes'|'legenda'|'credito';
                inicio?: number; duracao?: number; props: {...} };
 ```
 `duracaoDoPlano(plano)` devolve os segundos totais para o `durationInFrames`.
+
+## Temas (tema.ts + Fundos.tsx)
+`tema` no Plano muda o visual das cenas gráficas: fundo (`fundo: 'doc'`), cores, fontes, moldura da tela e enfeite dos
+cartões de papel. No arquivo real ele só muda o filtro de cor, a granulação, a barra da legenda e as fontes.
+Os componentes leem o tema com `useTema()` (`T.cor.ouro`, `T.fonte.titulo`...). `COR`/`FONTE` continuam existindo e são
+sempre as cores do tema padrão: use-as no plano para cores com significado fixo (um lado do conflito = uma cor).
+Fora do `DocVideo`, envolva com `<ProvedorTema tema="guerra">`. `TEMAS` lista todos os temas prontos.
 
 ## arquivo: vídeo/foto real em tela cheia
 `src`, `tipo?: 'video'|'foto'` (é detectado pela extensão), `inicioSeg?` (corte inicial do vídeo), `volume?` (0 = mudo),

@@ -1,6 +1,8 @@
 // DocumentaryStyle: componentes Remotion para documentário de arquivo.
-export { COR, FONTE } from './tema';
-export { FundoDoc, Granulacao, useFontesDoc, surgir, mola, arquivo } from './base';
+export { COR, FONTE, TEMAS, ProvedorTema, resolverTema, useTema } from './tema';
+export type { Tema, TemaId, TemaPersonalizado, EscolhaTema } from './tema';
+export { FundoDoc, OrnamentoCartao, OrnamentoTela } from './Fundos';
+export { Granulacao, useFontesDoc, surgir, mola, arquivo } from './base';
 export { Arquivo, FotoMoldura } from './Arquivo';
 export { CartaoDocumento, Legenda, Credito } from './Textos';
 export { MapaReal } from './MapaReal';
