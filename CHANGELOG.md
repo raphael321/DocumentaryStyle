@@ -12,6 +12,12 @@
 - O arquivo real não muda: o tema só ajusta filtro, granulação, legenda e fontes por cima dele.
 - **Mistura de temas**: `{ base, variar, cartoesDe }` e `MISTURAS` prontas (ex.: guerra = sonar + investigação + fumaça).
 - `arquivo` ganhou `modo: 'painel'` com `etiqueta`: o material real num painel sobre o fundo do tema.
+- **Som por tema**: `scripts/gerar-sons.py` sintetiza uma trilha por tema (sério e dinâmico) e os efeitos. Com
+  `som: { trilha: 'auto', ritmo }` o DocVideo toca a trilha em loop com ducking (sempre abaixo da voz) e põe efeitos
+  pelos blocos do plano: suaves no sério, mais vivos no dinâmico.
+- O detector também escolhe o **ritmo** (`serio`/`dinamico`) e imprime a linha `som` do plano.
+- `conferirPlano(plano)`: % do tempo com fotos/vídeos reais e o maior trecho sem arquivo.
+- Cena ganhou `audioInicio` e `audioDuracao`.
 - Testado com stills de documento, número, quadro de ligações, barras e arquivo em todos os temas (Remotion 4.0.540).
 
 ## 0.1.2 (2026-11-17)

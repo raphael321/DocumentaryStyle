@@ -45,7 +45,10 @@ export const Arquivo: React.FC<{
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
   const ehVideo = tipo ? tipo === 'video' : /\.(mp4|webm|mov|mkv)$/i.test(src);
-  const kb = kenBurns === false ? null : kenBurns ?? { de: { escala: 1.0, x: 0, y: 0 }, para: { escala: 1.08, x: 0, y: -1 } };
+  const kb =
+    kenBurns === false
+      ? null
+      : kenBurns ?? { de: { escala: 1.0, x: 0, y: 0 }, para: T.ritmo === 'dinamico' ? { escala: 1.16, x: -1.5, y: -1.5 } : { escala: 1.06, x: 0, y: -0.8 } };
   const p = interpolate(frame, [0, durationInFrames], [0, 1], { extrapolateRight: 'clamp' });
   const escala = kb ? kb.de.escala + (kb.para.escala - kb.de.escala) * p : 1;
   const x = kb ? kb.de.x + (kb.para.x - kb.de.x) * p : 0;

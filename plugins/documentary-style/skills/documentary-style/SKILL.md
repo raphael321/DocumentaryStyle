@@ -66,6 +66,22 @@ Ponha o resultado no plano (`tema: 'guerra'`) e diga ao usuário qual tema saiu 
   fundo das cenas gráficas (sonar → quadrícula de investigação → fumaça) e usa os cartões da investigação. Fica variado
   sem perder a seriedade. Monte a sua com `{ base, variar: [...], cartoesDe }`.
 - Para variar o arquivo sem tirá-lo da tela: `arquivo` com `modo: 'painel'` e `etiqueta` (painel 16:9 sobre o fundo do tema).
+
+### 2b. Som: trilha do tema e efeitos pelo ritmo
+O detector também diz o **ritmo**: `serio` (guerra, ditadura, tragédia, investigação) ou `dinamico` (lista, curiosidade,
+ação). Uma vez por projeto, gere os sons (trilha sintetizada por tema e efeitos, sem direito autoral, ~16 MB):
+```bash
+python <pasta-da-skill>/scripts/gerar-sons.py <projeto>/public/doc/sons     # precisa de numpy e scipy; ffmpeg deixa as trilhas em MP3
+```
+No plano: `som: { trilha: 'auto', ritmo: 'serio' }`, e em cada cena com narração `audioInicio` (respiro antes da fala) e
+`audioDuracao` (duração do MP3). Regras que o DocVideo já cumpre sozinho:
+- **A trilha nunca passa da voz.** Ela abaixa enquanto há fala (ducking) e sobe só um pouco nas pausas. Medido no teste:
+  sério fica ~22 dB abaixo da voz durante a fala e ~15 dB nas pausas; dinâmico, alguns dB mais alto. Ajuste fino com `volumeTrilha` (ex.: 0.7), nunca acima de 1.
+- **Efeitos pelo ritmo.** Sério: sopro discreto nas trocas de cena, ping de sonar nas cenas de sonar, batida no carimbo
+  e no número. Dinâmico: tudo isso mais vivo, com teclas no documento, contador tiquetaqueando e "pop" nos pinos.
+- O ritmo também muda o movimento: no dinâmico o Ken Burns é maior e as fusões mais curtas.
+- Música do canal no lugar da sintetizada: `som: { trilha: { src: 'musicas/faixa.mp3' }, ritmo: 'serio' }` (mesmo ducking).
+- Sem `som` no plano, nada muda (planos antigos continuam iguais).
 - O tema muda **só as cenas gráficas** e o acabamento do arquivo. Continue intercalando fotos e vídeos reais (regras abaixo).
 
 ### 3. Roteiro → plano
@@ -111,7 +127,8 @@ Checklist em cada quadro:
 - o crédito aparece em todo arquivo real
 - a legenda de lugar tem LOCAL e data
 - o fundo e a moldura combinam com o tema e não brigam com o texto do cartão
-- há foto ou vídeo real intercalado entre as cenas gráficas (40 a 60% do tempo)
+- há foto ou vídeo real intercalado entre as cenas gráficas (40 a 60% do tempo): `conferirPlano(PLANO)` devolve a % de fotos/vídeos e o maior trecho sem arquivo
+- a voz está sempre na frente: ouça o começo, uma cena gráfica e o fim com fone
 
 Depois:
 ```bash

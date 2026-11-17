@@ -59,6 +59,15 @@ const PALAVRAS = {
   ],
 };
 
+// RITMO: sinais de vídeo dinâmico (lista, curiosidade, ação rápida). Sem eles o vídeo é 'serio'.
+const DINAMICO = [
+  ['top', 3], 'curiosidade*', 'incrivel', 'incriveis', 'insano*', 'bizarr*', 'voce sabia', 'ranking', ['maiores', 2], ['mais rapido*', 2],
+  'recorde*', 'impressionante*', 'surpreendente*', 'louco', 'loucura', 'epico*', 'perseguicao', 'corrida', 'velocidade',
+  'explosao', 'explosoes', 'em segundos', 'ninguem acreditou', 'virou', 'viral', 'segredo*', 'numero 1', 'numero um',
+];
+// Temas que pedem trilha e efeitos discretos mesmo com sinais de ação
+const SERIOS = ['ditadura', 'investigacao'];
+
 const NOMES = {
   guerra: 'Guerra · estilo Sonar',
   realeza: 'Realeza',
@@ -102,6 +111,31 @@ export function pontuar(texto) {
     }
   }
   return { pontos, achados };
+}
+
+const REGRAS_DIN = DINAMICO.map((item) => {
+  const [p, peso] = Array.isArray(item) ? item : [item, 1];
+  const prefixo = p.endsWith('*');
+  const base = escapar(prefixo ? p.slice(0, -1) : p);
+  return { peso, re: new RegExp(`(?<![a-z0-9])${base}${prefixo ? '[a-z0-9-]*' : '(?![a-z0-9])'}`, 'g') };
+});
+
+/**
+ * Ritmo do vídeo: 'dinamico' quando o texto tem cara de lista/curiosidade/ação (palavras, exclamações, frases curtas),
+ * senão 'serio'. Mortes, ditadura e investigação puxam para o sério.
+ */
+export function escolherRitmo(texto, tema) {
+  const n = normalizar(texto);
+  let pts = 0;
+  for (const { peso, re } of REGRAS_DIN) pts += (n.match(re) ?? []).length * peso;
+  pts += (texto.match(/!/g) ?? []).length * 0.5;
+  const frases = texto.split(/[.!?]+/).map((f) => f.trim().split(/\s+/).length).filter((k) => k > 2);
+  const media = frases.reduce((s, k) => s + k, 0) / Math.max(1, frases.length);
+  if (media < 9) pts += 3;
+  const pesado = (n.match(/(?<![a-z])(morte|mortos|morreram|vitimas|tragedia|massacre|genocidio|tortura)/g) ?? []).length;
+  pts -= pesado * 0.8;
+  if (SERIOS.includes(tema)) pts -= 3;
+  return { ritmo: pts >= 6 ? 'dinamico' : 'serio', pontosDinamico: +pts.toFixed(1) };
 }
 
 /** Escolhe o tema. Sem sinal claro, cai em 'investigacao' (o visual neutro de "explicar o que aconteceu"). */
@@ -152,6 +186,7 @@ if (ehPrincipal) {
   }
   const textos = arquivos.map((f) => fs.readFileSync(f, 'utf8'));
   const geral = escolherTema(textos.join('\n'));
+  Object.assign(geral, escolherRitmo(textos[0], geral.tema));
   let cenas = [];
   if (args.includes('--cenas')) {
     cenas = dividirCenas(textos[0]).map((c) => {
@@ -167,11 +202,13 @@ if (ehPrincipal) {
     console.log(JSON.stringify({ ...geral, cenas }, null, 2));
   } else {
     console.log(`Tema: ${geral.tema} (${NOMES[geral.tema]}) · confiança ${geral.confianca}`);
+    console.log(`Ritmo: ${geral.ritmo} (${geral.ritmo === 'serio' ? 'trilha e efeitos discretos, movimento lento' : 'efeitos mais vivos, fusões curtas'})`);
     if (geral.secundario) console.log(`Segundo tema forte: ${geral.secundario} (${NOMES[geral.secundario]})`);
     console.log(`Pistas: ${geral.pistas.join(', ') || '-'}`);
     console.log(`Pontos: ${Object.entries(geral.pontos).map(([t, v]) => `${t} ${v}`).join(' · ')}`);
     for (const c of cenas.filter((c) => c.trocar)) console.log(`  cena "${c.cena}": sugere tema '${c.tema}'`);
     console.log(`\nNo plano (tema puro):  tema: '${geral.tema}'`);
     console.log(`No plano (misturado, varia o fundo entre as cenas gráficas):  import { MISTURAS } from '../doc';  tema: MISTURAS.${geral.tema}`);
+    console.log(`Som (trilha do tema sempre abaixo da voz):  som: { trilha: 'auto', ritmo: '${geral.ritmo}' }`);
   }
 }

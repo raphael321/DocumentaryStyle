@@ -15,6 +15,10 @@ type Bloco = { tipo: 'arquivo'|'foto'|'documento'|'mapa'|'globo'|'barras'|'numer
                inicio?: number; duracao?: number; props: {...} };
 ```
 `duracaoDoPlano(plano)` devolve os segundos totais para o `durationInFrames`.
+Cena: `audioInicio?` (respiro antes da fala) e `audioDuracao?` (duração da fala, usada no ducking).
+Plano: `som?: { trilha?: 'auto' | { src, volume? } | false; ritmo?: 'serio' | 'dinamico'; efeitos?: boolean;
+volumeTrilha?; volumeEfeitos?; pasta? ('doc/sons'); extensao? ('mp3') }`. Arquivos: `scripts/gerar-sons.py`.
+`eventosDeSom(plano)` lista os efeitos que vão tocar; `conferirPlano(plano)` mede a intercalação com material real.
 
 ## Temas (tema.ts + Fundos.tsx)
 `tema` no Plano muda o visual das cenas gráficas: fundo (`fundo: 'doc'`), cores, fontes, moldura da tela e enfeite dos

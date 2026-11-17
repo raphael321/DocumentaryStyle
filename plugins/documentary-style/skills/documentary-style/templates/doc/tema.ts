@@ -58,7 +58,14 @@ export type Tema = {
   filtroArquivo: string;
   /** granulação padrão por cima do arquivo */
   graos: number;
+  /** trilha sintetizada que combina com o tema (arquivo em doc/sons/trilhas/<trilha>-<ritmo>.mp3) */
+  trilha: TrilhaId;
+  /** 'serio' = efeitos suaves e movimento lento · 'dinamico' = efeitos mais vivos e movimento maior. Vem do Plano. */
+  ritmo?: Ritmo;
 };
+
+export type TrilhaId = 'guerra' | 'investigacao' | 'realeza' | 'ditadura' | 'mar' | 'antiguidade';
+export type Ritmo = 'serio' | 'dinamico';
 
 /** Personalização: parte de um tema pronto e troca o que quiser. */
 export type TemaPersonalizado = {
@@ -126,6 +133,7 @@ export const TEMAS: Record<TemaId, Tema> = {
     ornamento: 'nenhum',
     filtroArquivo: 'saturate(0.92) contrast(1.04)',
     graos: 0.07,
+    trilha: 'investigacao',
   },
   // Estilo 2 "Sonar / varredura": tudo nasce do escuro, linhas de eco azul-gelo, alvo em âmbar.
   guerra: {
@@ -154,6 +162,7 @@ export const TEMAS: Record<TemaId, Tema> = {
     ornamento: 'sonar',
     filtroArquivo: 'saturate(0.55) contrast(1.12) brightness(0.92)',
     graos: 0.08,
+    trilha: 'guerra',
   },
   // Estilo 5 "Investigação visual": painéis de perícia, etiqueta vermelha, transcrição em papel, dado com cursor.
   investigacao: {
@@ -182,6 +191,7 @@ export const TEMAS: Record<TemaId, Tema> = {
     ornamento: 'investigacao',
     filtroArquivo: 'saturate(0.85) contrast(1.06)',
     graos: 0.04,
+    trilha: 'investigacao',
   },
   // Guerra "clássica": carvão e oliva, fumaça, quadrícula de carta militar e documento datilografado.
   guerraClassica: {
@@ -209,6 +219,7 @@ export const TEMAS: Record<TemaId, Tema> = {
     ornamento: 'militar',
     filtroArquivo: 'saturate(0.7) contrast(1.1) sepia(0.12)',
     graos: 0.1,
+    trilha: 'guerra',
   },
   realeza: {
     id: 'realeza',
@@ -236,6 +247,7 @@ export const TEMAS: Record<TemaId, Tema> = {
     ornamento: 'filigrana',
     filtroArquivo: 'saturate(0.95) contrast(1.03) sepia(0.08)',
     graos: 0.05,
+    trilha: 'realeza',
   },
   ditadura: {
     id: 'ditadura',
@@ -263,6 +275,7 @@ export const TEMAS: Record<TemaId, Tema> = {
     ornamento: 'faixas',
     filtroArquivo: 'grayscale(0.55) contrast(1.15)',
     graos: 0.11,
+    trilha: 'ditadura',
   },
   aviacao: {
     id: 'aviacao',
@@ -290,6 +303,7 @@ export const TEMAS: Record<TemaId, Tema> = {
     ornamento: 'hud',
     filtroArquivo: 'saturate(0.9) contrast(1.06)',
     graos: 0.05,
+    trilha: 'investigacao',
   },
   mar: {
     id: 'mar',
@@ -317,6 +331,7 @@ export const TEMAS: Record<TemaId, Tema> = {
     ornamento: 'nautico',
     filtroArquivo: 'saturate(0.85) contrast(1.05) hue-rotate(-4deg)',
     graos: 0.07,
+    trilha: 'mar',
   },
   antiguidade: {
     id: 'antiguidade',
@@ -344,6 +359,7 @@ export const TEMAS: Record<TemaId, Tema> = {
     ornamento: 'meandro',
     filtroArquivo: 'sepia(0.3) saturate(0.85) contrast(1.05)',
     graos: 0.08,
+    trilha: 'antiguidade',
   },
   crime: {
     id: 'crime',
@@ -371,6 +387,7 @@ export const TEMAS: Record<TemaId, Tema> = {
     ornamento: 'dossie',
     filtroArquivo: 'grayscale(0.35) contrast(1.12) brightness(0.95)',
     graos: 0.1,
+    trilha: 'investigacao',
   },
 };
 
@@ -433,11 +450,15 @@ const TemaContexto = createContext<Tema>(TEMAS.padrao);
 export const useTema = () => useContext(TemaContexto);
 
 /** Aplica um tema a tudo que estiver dentro. O DocVideo já faz isso sozinho. */
-export const ProvedorTema: React.FC<{ tema?: EscolhaTema | Tema; variacao?: number; children: React.ReactNode }> = ({
+export const ProvedorTema: React.FC<{ tema?: EscolhaTema | Tema; variacao?: number; ritmo?: Ritmo; children: React.ReactNode }> = ({
   tema,
   variacao = 0,
+  ritmo,
   children,
-}) => React.createElement(TemaContexto.Provider, { value: resolverTema(tema, variacao) }, children);
+}) => {
+  const t = resolverTema(tema, variacao);
+  return React.createElement(TemaContexto.Provider, { value: ritmo ? { ...t, ritmo } : t }, children);
+};
 
 // Compatibilidade: COR e FONTE continuam sendo as cores e fontes do tema padrão.
 // Use para cores com SIGNIFICADO fixo no plano (um lado do conflito = uma cor), não para o visual do tema.
