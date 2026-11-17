@@ -53,13 +53,16 @@ const ICONES: Record<NomeIcone, React.ReactNode> = {
   ),
 };
 
-export const Icone: React.FC<{ nome: NomeIcone | string; x: number; y: number; angulo: number; escala?: number }> = ({
-  nome,
-  x,
-  y,
-  angulo,
-  escala = 1,
-}) => {
+export const Icone: React.FC<{
+  nome: NomeIcone | string;
+  x: number;
+  y: number;
+  angulo: number;
+  escala?: number;
+  /** selo claro com borda colorida atrás do ícone: sem ele, tanque/caminhão somem em cima do satélite */
+  selo?: boolean;
+  cor?: string;
+}> = ({ nome, x, y, angulo, escala = 1, selo = nome === 'tanque' || nome === 'caminhao' || nome === 'soldado', cor = COR.ouro }) => {
   const graus = (angulo * 180) / Math.PI;
   const espelhar = Math.abs(graus) > 90; // mantém navio/tanque "em pé" quando vai para a esquerda
   const rot = espelhar ? graus - 180 : graus;
@@ -70,6 +73,14 @@ export const Icone: React.FC<{ nome: NomeIcone | string; x: number; y: number; a
       <image href={arquivo(nome)} x={-32} y={-32} width={64} height={64} />
     );
   const terrestre = nome === 'tanque' || nome === 'caminhao' || nome === 'soldado' || nome === 'navio' || nome === 'submarino';
+  if (selo) {
+    return (
+      <g transform={`translate(${x} ${y}) scale(${escala})`} style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.75))' }}>
+        <circle r={33} fill="#f1efe8" stroke={cor} strokeWidth={4} />
+        <g transform={`scale(${espelhar ? -0.78 : 0.78} 0.78) translate(-4 -2)`}>{conteudo}</g>
+      </g>
+    );
+  }
   return (
     <g
       transform={`translate(${x} ${y}) rotate(${terrestre ? rot * 0.25 : rot}) scale(${(espelhar ? -1 : 1) * escala} ${escala})`}
@@ -89,7 +100,8 @@ export const LinhaAnimada: React.FC<{
   tracejado?: boolean;
   icone?: string;
   ponta?: boolean;
-}> = ({ pontos, p, cor = COR.branco, largura = 3, tracejado = true, icone, ponta = false }) => {
+  selo?: boolean;
+}> = ({ pontos, p, cor = COR.branco, largura = 3, tracejado = true, icone, ponta = false, selo }) => {
   if (p <= 0 || pontos.length < 2) return null;
   const { pontos: parte, angulo } = cortarLinha(pontos, p);
   const d = caminhoTela(parte);
@@ -117,7 +129,7 @@ export const LinhaAnimada: React.FC<{
           transform={`translate(${fim[0]} ${fim[1]}) rotate(${(angulo * 180) / Math.PI})`}
         />
       )}
-      {icone && p < 1.0001 && <Icone nome={icone} x={fim[0]} y={fim[1]} angulo={angulo} />}
+      {icone && p < 1.0001 && <Icone nome={icone} x={fim[0]} y={fim[1]} angulo={angulo} selo={selo} cor={cor} />}
     </g>
   );
 };

@@ -5,6 +5,9 @@
 - Novo `scripts/blocos-hd.mjs`: corta o HD em 32 blocos de 45° (2700 px). `baixar-mapas.mjs --hd` já roda o corte.
 - `MapaReal` ganhou a prop `hd`: carrega só os blocos visíveis. A demo usa `hd: true`.
 - Vídeo de demonstração completo (48 s) renderizado do começo ao fim.
+- O satélite do `MapaReal` agora é desenhado num canvas recortando só a parte visível de cada imagem: some a emenda entre blocos.
+- Ícones terrestres (tanque, caminhão, soldado) vão num selo claro com borda na cor da rota; antes o tanque sumia no satélite.
+- Demo: câmera do mapa mais próxima (altura 1,15°) e o tanque faz o avanço Collecchio → Fornovo.
 
 ## 0.1.1 (2026-11-17)
 - Testada a textura HD da NASA (21600 px) no zoom do vale do Taro: relevo, rio Pó e Apeninos nítidos em altura ~2,5°.

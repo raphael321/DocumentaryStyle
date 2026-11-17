@@ -45,8 +45,9 @@ export const PLANO_DEMO: Plano = {
           props: {
             camera: [
               { t: 0, lon: 11.5, lat: 42.6, altura: 13 },
-              { t: 3.2, lon: 10.4, lat: 44.6, altura: 3.2 },
-              { t: 9.4, lon: 10.25, lat: 44.72, altura: 2.4 },
+              { t: 3.2, lon: 10.3, lat: 44.64, altura: 2.4 },
+              { t: 7.4, lon: 10.16, lat: 44.68, altura: 1.25 },
+              { t: 9.4, lon: 10.15, lat: 44.68, altura: 1.15 },
             ],
             hd: true, // zoom de vale: satélite HD em blocos (baixar-mapas --hd)
             escurecer: 0.12,
@@ -57,7 +58,8 @@ export const PLANO_DEMO: Plano = {
               { lon: COLLECCHIO[0], lat: COLLECCHIO[1], rotulo: 'Collecchio', sub: '26 de abril', aos: 4.0, cor: COR.verde, lado: 'cima' },
               { lon: FORNOVO[0], lat: FORNOVO[1], rotulo: 'Fornovo di Taro', sub: '29 de abril de 1945', aos: 5.2, lado: 'esquerda' },
             ],
-            rotas: [{ pontos: [PARMA, COLLECCHIO], aos: 3.8, dur: 1.4, cor: COR.verde, icone: 'tanque', tracejado: true }],
+            // avanço da FEB de Collecchio para Fornovo: o tanque vai num selo claro para não sumir no satélite
+            rotas: [{ pontos: [COLLECCHIO, [10.125, 44.705]], aos: 4.3, dur: 2.6, cor: COR.verde, icone: 'tanque', tracejado: true, largura: 6 }],
             setas: [{ de: [9.75, 44.42], para: [10.05, 44.66], aos: 5.6, dur: 1.2, cor: COR.vermelho, curva: -0.12 }],
             circulos: [{ lon: FORNOVO[0], lat: FORNOVO[1], raioKm: 7, aos: 7.0, cor: COR.ouro }],
             rotulos: [{ lon: 9.95, lat: 44.52, texto: 'Vale do Taro', aos: 6.0, tamanho: 28 }],

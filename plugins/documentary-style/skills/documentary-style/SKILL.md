@@ -89,7 +89,7 @@ npx remotion still src/index.ts MeuVideo out/check/f0300.png --frame=300
 Checklist em cada quadro:
 - texto legível e dentro da área segura (90 px das bordas)
 - o pino ou a seta está no lugar certo do mapa (compare com um mapa de referência)
-- o mapa não está borrado: altura < 20° pede `hd: true` (testado até ~2,5°, nítido o bastante para vale), e abaixo de ~2° pede recorte regional
+- o mapa não está borrado: altura < 20° pede `hd: true` (aceitável até ~1,2°), e abaixo disso pede recorte regional
 - o crédito aparece em todo arquivo real
 - a legenda de lugar tem LOCAL e data
 
@@ -100,6 +100,8 @@ npx remotion render src/index.ts MeuVideo out/meu-video.mp4
 
 ## Armadilhas que já aconteceram
 - **Mapa borrado no zoom**: a textura de 5400 px dá ~15 px por grau. Com `altura` de 3°, isso amplia 25 vezes. Use `hd: true` ou `texturasExtras`.
+- **Ícone de tanque invisível**: verde-oliva em cima do satélite verde-oliva. Os ícones terrestres agora vão num selo claro (`selo`), e a rota precisa ter comprimento na tela para o movimento aparecer.
+- **Zoom fechado sem nitidez**: a NASA tem ~500 m por pixel. Com `hd: true` dá até ~1,2° de `altura`; mais perto que isso, só com recorte regional (Sentinel-2, 10 m).
 - **Render trava ou a aba cai no mapa** ("Session closed", timeout): nunca passe `textura: 'doc/mapa/terra-hd.jpg'`. A imagem de 21600 px inteira estoura a memória do navegador. Use `hd: true` (blocos). Se sobrar `chrome-headless-shell` de um render que caiu, feche esses processos antes de tentar de novo.
 - **Wikimedia bloqueia miniatura grande** (erro 400/429): baixe a NASA direto de `assets.science.nasa.gov` (o script já faz isso).
 - **País não aparece**: o código é o `ADM0_A3` do Natural Earth (BRA, ITA, DEU, FRA, PRK, KOR, USA, RUS…), não o nome.

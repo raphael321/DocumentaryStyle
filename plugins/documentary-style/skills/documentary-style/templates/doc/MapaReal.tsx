@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react';
-import { AbsoluteFill, Img, useCurrentFrame, useVideoConfig } from 'remotion';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { AbsoluteFill, cancelRender, continueRender, delayRender, useCurrentFrame, useVideoConfig } from 'remotion';
 import { COR } from './tema';
-import { arquivo, mola, surgir } from './base';
+import { carregarImagem, mola, surgir } from './base';
 import {
   Caixa,
   LonLat,
@@ -18,7 +18,7 @@ import {
 import { LinhaAnimada, Medalhao, Pino, Rotulo } from './Marcadores';
 
 export type PaisDestaque = { iso: string; cor?: string; aos?: number; opacidade?: number; borda?: string };
-export type Rota = { pontos: LonLat[]; aos?: number; dur?: number; cor?: string; curva?: number; icone?: string; tracejado?: boolean; largura?: number };
+export type Rota = { pontos: LonLat[]; aos?: number; dur?: number; cor?: string; curva?: number; icone?: string; tracejado?: boolean; largura?: number; selo?: boolean };
 export type Seta = { de: LonLat; para: LonLat; aos?: number; dur?: number; cor?: string; curva?: number; largura?: number; icone?: string };
 export type PinoMapa = { lon: number; lat: number; rotulo?: string; sub?: string; aos?: number; cor?: string; bandeira?: string; pulso?: boolean; lado?: 'baixo' | 'direita' | 'cima' | 'esquerda' };
 export type MedalhaoMapa = { lon: number; lat: number; foto: string; nome?: string; aos?: number; cor?: string; tamanho?: number; pb?: boolean };
@@ -26,6 +26,62 @@ export type RotuloMapa = { lon: number; lat: number; texto: string; sub?: string
 export type Area = { pontos: LonLat[]; cor?: string; aos?: number; opacidade?: number; borda?: string };
 export type Circulo = { lon: number; lat: number; raioKm: number; aos?: number; cor?: string };
 export type TexturaExtra = Caixa & { src: string };
+
+/**
+ * Desenha as camadas de satélite num canvas do tamanho da tela. Cada imagem entra só com o pedaço visível
+ * (drawImage com recorte). Com <img> de dezenas de milhares de pixels o Chrome perde qualidade em partes
+ * diferentes e aparecem emendas entre os blocos.
+ */
+const Satelite: React.FC<{
+  camadas: TexturaExtra[];
+  retangulo: (c: Caixa) => { left: number; top: number; width: number; height: number };
+  largura: number;
+  altura: number;
+}> = ({ camadas, retangulo, largura, altura }) => {
+  const ref = useRef<HTMLCanvasElement>(null);
+  const [imgs, setImgs] = useState<Record<string, HTMLImageElement>>({});
+  const faltam = camadas.map((c) => c.src).filter((s) => !imgs[s]);
+  const chaveFaltam = faltam.join('|');
+  const handle = useMemo(() => (faltam.length ? delayRender(`DocumentaryStyle: satélite ${chaveFaltam}`) : null), [chaveFaltam]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (handle === null) return;
+    let vivo = true;
+    Promise.all(faltam.map((s) => carregarImagem(s).then((img) => [s, img] as const)))
+      .then((lista) => {
+        if (vivo) setImgs((antes) => ({ ...antes, ...Object.fromEntries(lista) }));
+        continueRender(handle);
+      })
+      .catch((e) => cancelRender(e));
+    return () => {
+      vivo = false;
+    };
+  }, [handle]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useLayoutEffect(() => {
+    const ctx = ref.current?.getContext('2d');
+    if (!ctx) return;
+    ctx.clearRect(0, 0, largura, altura);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.filter = 'saturate(1.18) contrast(1.06)';
+    for (const c of camadas) {
+      const img = imgs[c.src];
+      if (!img) continue;
+      const r = retangulo(c);
+      // destino em pixels inteiros (vizinhos se sobrepõem até 1 px: sem fresta entre blocos)
+      const x0 = Math.max(0, Math.floor(r.left)), y0 = Math.max(0, Math.floor(r.top));
+      const x1 = Math.min(largura, Math.ceil(r.left + r.width)), y1 = Math.min(altura, Math.ceil(r.top + r.height));
+      if (x1 <= x0 || y1 <= y0) continue;
+      const kx = img.naturalWidth / r.width, ky = img.naturalHeight / r.height;
+      const sx = Math.max(0, (x0 - r.left) * kx), sy = Math.max(0, (y0 - r.top) * ky);
+      const sw = Math.min(img.naturalWidth - sx, (x1 - x0) * kx), sh = Math.min(img.naturalHeight - sy, (y1 - y0) * ky);
+      if (sw <= 0 || sh <= 0) continue;
+      ctx.drawImage(img, sx, sy, sw, sh, x0, y0, x1 - x0, y1 - y0);
+    }
+  });
+
+  return <canvas ref={ref} width={largura} height={altura} style={{ position: 'absolute', left: 0, top: 0 }} />;
+};
 
 const PASTA_HD = 'doc/mapa/hd';
 /** blocos de 45° (8 colunas x 4 linhas, gerados por blocos-hd.mjs) que cruzam a área visível */
@@ -101,24 +157,18 @@ export const MapaReal: React.FC<PropsMapaReal> = ({
     [listaRios, Math.round(proj.visivel.oeste), Math.round(proj.visivel.norte), Math.round(cam.altura)],
   );
 
-  const ret = proj.retangulo({ oeste: -180, sul: -90, leste: 180, norte: 90 });
   const pulso = (frame % Math.round(fps * 1.6)) / (fps * 1.6);
   const blocos = hd && cam.altura < 30 ? blocosVisiveis(proj.visivel, typeof hd === 'string' ? hd : PASTA_HD) : [];
+  const camadas: TexturaExtra[] = [
+    { src: textura, oeste: -180, sul: -90, leste: 180, norte: 90 },
+    ...blocos,
+    ...texturasExtras.filter((t) => cruza(t, proj.visivel)),
+  ];
 
   return (
     <AbsoluteFill style={{ backgroundColor: '#04070d', overflow: 'hidden' }}>
-      {/* satélite */}
-      <Img src={arquivo(textura)} style={{ position: 'absolute', ...ret, maxWidth: 'none', filter: 'saturate(1.18) contrast(1.06)' }} />
-      {blocos.map((b) => {
-        const r = proj.retangulo(b);
-        // +1 px para não aparecer costura entre blocos
-        return (
-          <Img key={b.src} src={arquivo(b.src)} style={{ position: 'absolute', left: r.left, top: r.top, width: r.width + 1, height: r.height + 1, maxWidth: 'none', filter: 'saturate(1.18) contrast(1.06)' }} />
-        );
-      })}
-      {texturasExtras.map((t, i) => (
-        <Img key={i} src={arquivo(t.src)} style={{ position: 'absolute', ...proj.retangulo(t), maxWidth: 'none', filter: 'saturate(1.1) contrast(1.04)' }} />
-      ))}
+      {/* satélite: desenhado num canvas, recortando só o pedaço visível de cada imagem */}
+      <Satelite camadas={camadas} retangulo={proj.retangulo} largura={width} altura={height} />
       <AbsoluteFill style={{ background: `rgba(4,10,22,${escurecer})` }} />
 
       {/* camadas geográficas no espaço de graus */}
@@ -181,7 +231,7 @@ export const MapaReal: React.FC<PropsMapaReal> = ({
         {rotas.map((r, i) => {
           const pts = amostrarCurva(r.pontos.map(proj.tela), r.curva ?? 0.12);
           const p = surgir(frame, fps, r.aos ?? 0, r.dur ?? 2);
-          return <LinhaAnimada key={`r${i}`} pontos={pts} p={p} cor={r.cor ?? COR.branco} largura={r.largura ?? 3} tracejado={r.tracejado ?? true} icone={r.icone} />;
+          return <LinhaAnimada key={`r${i}`} pontos={pts} p={p} cor={r.cor ?? COR.branco} largura={r.largura ?? 3} tracejado={r.tracejado ?? true} icone={r.icone} selo={r.selo} />;
         })}
         {setas.map((s, i) => {
           const pts = amostrarCurva([proj.tela(s.de), proj.tela(s.para)], s.curva ?? 0.15);

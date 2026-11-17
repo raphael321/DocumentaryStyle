@@ -35,7 +35,9 @@ paises?:   { iso, cor?, aos?, opacidade? (0.72), borda? }[]      // iso = ADM0_A
 rios?:     boolean | { cor?, aos? }
 areas?:    { pontos: [lon,lat][], cor?, aos?, opacidade?, borda? }[]   // bolsões, zonas ocupadas
 circulos?: { lon, lat, raioKm, aos?, cor? }[]                          // cerco, raio de alcance
-rotas?:    { pontos: [lon,lat][], aos?, dur?, cor?, curva?, icone?, tracejado?, largura? }[]
+rotas?:    { pontos: [lon,lat][], aos?, dur?, cor?, curva?, icone?, tracejado?, largura?, selo? }[]
+           // selo: círculo claro com borda na cor da rota atrás do ícone. Ligado por padrão em tanque/caminhão/soldado
+           // (verde-oliva some em cima do satélite). Rota curta (< ~80 px na tela) fica escondida atrás do selo: aproxime a câmera.
 setas?:    { de, para, aos?, dur?, cor?, curva?, largura? (12), icone? }[]   // avanço/ataque
 pinos?:    { lon, lat, rotulo?, sub?, aos?, cor?, bandeira? (imagem), pulso?, lado? }[]
 medalhoes?:{ lon, lat, foto, nome?, aos?, cor?, tamanho? (118), pb? }[]
