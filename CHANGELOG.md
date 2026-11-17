@@ -1,6 +1,9 @@
 # Changelog
 
 ## 0.2.0 (2026-11-17)
+- Novo: **curtir + inscreva-se + sininho** em todo vídeo (`plano.inscreva`, ligado por padrão): entra depois do gancho,
+  a cada ~6 min e perto do fim, com cursor animado e cliques/sino baixinhos. Novo efeito `sino` no `gerar-sons.py`
+  (e a opção `--so-efeitos`).
 - Novo: **temas por assunto**. `scripts/detectar-tema.mjs` lê o roteiro/briefing e escolhe o tema; o plano recebe `tema`.
 - `guerra` usa o estilo **Sonar** (preto, varredura e eco azul-gelo, alvos em âmbar, documento em painel escuro).
 - `investigacao` usa o estilo **Investigação visual** (grafite, quadrícula, etiqueta e grifo vermelhos, transcrição em papel).

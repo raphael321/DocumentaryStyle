@@ -82,6 +82,13 @@ No plano: `som: { trilha: 'auto', ritmo: 'serio' }`, e em cada cena com narraç�
 - O ritmo também muda o movimento: no dinâmico o Ken Burns é maior e as fusões mais curtas.
 - Música do canal no lugar da sintetizada: `som: { trilha: { src: 'musicas/faixa.mp3' }, ritmo: 'serio' }` (mesmo ducking).
 - Sem `som` no plano, nada muda (planos antigos continuam iguais).
+
+### 2c. Curtir e inscreva-se (sempre)
+Todo vídeo leva a chamada de **curtir + inscreva-se + sininho** (cursor clica nos três, ~6 s, canto inferior direito).
+O DocVideo já põe sozinho: logo depois da 1ª cena (gancho), a cada ~6 min nos vídeos longos e ~25 s antes do fim, com
+cliques e sininho baixinhos no som. Ajustes no plano: `inscreva: { momentos: [42, 230] }`, `chamada: 'Se esta história
+te prendeu'`, `cor: '#...'` (cor do canal), `posicao: 'centro'`. Só desligue (`inscreva: false`) se o usuário pedir.
+Ao escolher os momentos à mão, evite cair em cima de uma legenda no canto direito ou de um crédito importante.
 - O tema muda **só as cenas gráficas** e o acabamento do arquivo. Continue intercalando fotos e vídeos reais (regras abaixo).
 
 ### 3. Roteiro → plano

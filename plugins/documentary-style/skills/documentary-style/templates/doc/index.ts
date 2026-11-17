@@ -13,3 +13,5 @@ export { DocVideo, duracaoDoPlano } from './DocVideo';
 export type { Plano, CenaPlano, Bloco, Som } from './DocVideo';
 export { eventosDeSom, conferirPlano } from './Som';
 export type { LonLat, QuadroCamera, QuadroGlobo } from './geo';
+export { BotaoInscreva, momentosInscreva, DURACAO_INSCREVA, TEMPOS_INSCREVA } from './Inscreva';
+export type { Inscreva } from './Inscreva';

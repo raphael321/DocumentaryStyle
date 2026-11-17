@@ -84,5 +84,11 @@ rotulos?:  { lon, lat, texto, sub?, aos?, tamanho? }[]
 `nos: { id, x, y (em %), titulo, sub?, foto?, aos?, rotacao?, destaque? }[]`,
 `ligacoes: { de, para, rotulo?, aos?, cor?, dur? }[]`, `foco?: { id | '*', aos, zoom? }[]`.
 
+## inscreva: curtir + inscreva-se + sininho (automático)
+Vem ligado em todo plano (`plano.inscreva`). Padrão: depois da 1ª cena, a cada ~6 min e ~25 s antes do fim.
+`{ momentos?: number[]; texto?: 'INSCREVA-SE'; textoInscrito?: 'INSCRITO'; chamada?; cor?: '#E0262B'; posicao?: 'direita'|'centro' }`
+ou `false`. Duração `DURACAO_INSCREVA` (6,2 s). Efeitos: clique no curtir e no inscrever, `sino` no sininho
+(gere com `gerar-sons.py --so-efeitos` se o projeto já tinha os sons). Componente solto: `BotaoInscreva`.
+
 ## legenda / credito (soltos)
 `legenda`: `{ local, data?, aos? }`. `credito`: `{ texto }`. Use por cima de qualquer bloco.

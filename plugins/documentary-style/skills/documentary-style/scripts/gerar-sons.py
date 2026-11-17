@@ -3,10 +3,11 @@
 
 uso:  python gerar-sons.py <projeto>/public/doc/sons            (precisa de numpy e scipy; ffmpeg é opcional)
       python gerar-sons.py <saida> --so guerra,investigacao     (só algumas trilhas)
+      python gerar-sons.py <saida> --so-efeitos                 (só os efeitos)
 
 Saída:
   trilhas/<tema>-serio.mp3  e  trilhas/<tema>-dinamico.mp3   (64 s, emendam em loop; .wav se não houver ffmpeg)
-  efeitos/serio/*.wav       e  efeitos/dinamico/*.wav         (sopro, ping, tique, tecla, carimbo, clique, impacto, pop)
+  efeitos/serio/*.wav       e  efeitos/dinamico/*.wav         (sopro, ping, tique, tecla, carimbo, clique, impacto, pop, sino)
 
 Tudo sai normalizado com pico em -1 dBFS. O VOLUME final (sempre abaixo da locução) é decidido pelo DocVideo.
 Para usar a música do canal no lugar da sintetizada: `som: { trilha: { src: 'musicas/minha.mp3' } }` no plano.
@@ -270,6 +271,14 @@ def efeitos(ritmo):
     # pop (pino aparecendo)
     t = t_(0.15)
     out['pop'] = np.sin(2 * np.pi * (500 + 700 * np.exp(-t * 40)) * t) * env(len(t), 0.001, 0.04)
+    # sino (sininho da chamada de inscrição): duas batidas leves, parciais de sino
+    t = t_(1.6)
+    toque = lambda f: sum(a * np.sin(2 * np.pi * f * r * t) * np.exp(-t * dec) for r, a, dec in ((1, 1, 3.2), (2.76, 0.4, 5), (5.4, 0.18, 8)))
+    s = toque(1568 if din else 1318)
+    s2 = np.zeros_like(s)
+    k = int(0.16 * SR)
+    s2[k:] = 0.7 * s[: len(s) - k]
+    out['sino'] = (s + s2) * env(len(t), 0.001, 1.6)
     return out
 
 
@@ -284,6 +293,8 @@ if __name__ == '__main__':
     so = TEMAS
     if '--so' in sys.argv:
         so = sys.argv[sys.argv.index('--so') + 1].split(',')
+    if '--so-efeitos' in sys.argv:
+        so = []
     for tema in so:
         for ritmo in ('serio', 'dinamico'):
             salvar(os.path.join(saida, 'trilhas', f'{tema}-{ritmo}.wav'), trilha(tema, ritmo), mp3=True)

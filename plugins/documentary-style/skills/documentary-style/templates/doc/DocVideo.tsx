@@ -9,6 +9,7 @@ import { ComparacaoBarras, LinhaDoTempo, NumeroGrande } from './Graficos';
 import { QuadroConexoes } from './QuadroConexoes';
 import { EscolhaTema, ProvedorTema, Ritmo } from './tema';
 import { SomDoPlano } from './Som';
+import { BotaoInscreva, DURACAO_INSCREVA, Inscreva, momentosInscreva } from './Inscreva';
 
 type P<C extends React.FC<any>> = React.ComponentProps<C>;
 type Tempo = { inicio?: number; duracao?: number };
@@ -77,6 +78,11 @@ export type Plano = {
   /** fusão entre cenas, em segundos (padrão 0.5 no ritmo sério e 0.3 no dinâmico) */
   fusao?: number;
   trilha?: { src: string; volume?: number };
+  /**
+   * Chamada de curtir + inscreva-se + sininho. Vem LIGADA por padrão (depois do gancho, a cada ~6 min e perto do fim).
+   * { momentos: [12, 230] } escolhe os instantes; { chamada: '...' } põe uma frase acima; false desliga.
+   */
+  inscreva?: Inscreva;
 };
 
 const RENDER: { [K in Bloco['tipo']]: React.FC<any> } = {
@@ -154,6 +160,13 @@ export const DocVideo: React.FC<{ plano: Plano }> = ({ plano }) => {
         );
       })}
       {plano.trilha && !plano.som && <Audio src={arquivo(plano.trilha.src)} volume={plano.trilha.volume ?? 0.12} loop />}
+      {momentosInscreva(plano.cenas.map((c) => c.duracao), plano.inscreva).map((m, k) => (
+        <Sequence key={`inscreva${k}`} from={Math.round(m * fps)} durationInFrames={Math.round(DURACAO_INSCREVA * fps)} name="inscreva-se">
+          <ProvedorTema tema={plano.tema} variacao={0} ritmo={ritmo}>
+            <BotaoInscreva {...(plano.inscreva || {})} />
+          </ProvedorTema>
+        </Sequence>
+      ))}
       <SomDoPlano plano={plano.som && !plano.som.trilha && plano.trilha ? { ...plano, som: { ...plano.som, trilha: plano.trilha } } : plano} total={duracaoDoPlano(plano)} />
     </AbsoluteFill>
   );

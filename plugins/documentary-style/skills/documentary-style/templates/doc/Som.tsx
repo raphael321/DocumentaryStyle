@@ -5,8 +5,9 @@ import { Audio, Sequence, interpolate, useVideoConfig } from 'remotion';
 import { arquivo } from './base';
 import type { Plano } from './DocVideo';
 import { Ritmo, resolverTema } from './tema';
+import { TEMPOS_INSCREVA, momentosInscreva } from './Inscreva';
 
-export type NomeEfeito = 'sopro' | 'ping' | 'tique' | 'tecla' | 'carimbo' | 'clique' | 'impacto' | 'pop';
+export type NomeEfeito = 'sopro' | 'ping' | 'tique' | 'tecla' | 'carimbo' | 'clique' | 'impacto' | 'pop' | 'sino';
 export type EventoSom = { nome: NomeEfeito; t: number; vol: number };
 
 /** Volumes de referência (multiplicam o arquivo, que sai do gerar-sons.py com pico em -1 dBFS). */
@@ -15,13 +16,13 @@ export const NIVEIS: Record<Ritmo, { trilhaSemFala: number; trilhaComFala: numbe
   serio: {
     trilhaSemFala: 0.22,
     trilhaComFala: 0.07,
-    efeito: { sopro: 0.07, ping: 0.07, tique: 0.03, tecla: 0.03, carimbo: 0.22, clique: 0.08, impacto: 0.14, pop: 0.04 },
+    efeito: { sopro: 0.07, ping: 0.07, tique: 0.03, tecla: 0.03, carimbo: 0.22, clique: 0.08, impacto: 0.14, pop: 0.04, sino: 0.06 },
   },
   // dinâmico: um pouco mais presente, mas a voz continua na frente
   dinamico: {
     trilhaSemFala: 0.3,
     trilhaComFala: 0.1,
-    efeito: { sopro: 0.18, ping: 0.12, tique: 0.07, tecla: 0.07, carimbo: 0.35, clique: 0.16, impacto: 0.3, pop: 0.12 },
+    efeito: { sopro: 0.18, ping: 0.12, tique: 0.07, tecla: 0.07, carimbo: 0.35, clique: 0.16, impacto: 0.3, pop: 0.12, sino: 0.12 },
   },
 };
 
@@ -78,6 +79,12 @@ export const eventosDeSom = (plano: Plano): EventoSom[] => {
     }
     ini += c.duracao;
   });
+  // chamada de inscrição: clique no curtir, no inscrever e sininho
+  for (const m of momentosInscreva(plano.cenas.map((c) => c.duracao), plano.inscreva)) {
+    add('clique', m + TEMPOS_INSCREVA.curtir, 0.8);
+    add('clique', m + TEMPOS_INSCREVA.inscrever, 0.8);
+    add('sino', m + TEMPOS_INSCREVA.sino);
+  }
   const fator = plano.som?.volumeEfeitos ?? 1;
   return ev.map((e) => ({ ...e, vol: e.vol * fator }));
 };
