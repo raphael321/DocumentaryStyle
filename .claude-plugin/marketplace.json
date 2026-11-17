@@ -1,7 +1,7 @@
 {
   "name": "documentary-style",
   "description": "DocumentaryStyle: documentários de arquivo em Remotion, com vídeo real em tela cheia, mapa de satélite real animado, cartões de documento, ligações de fatos e gráficos.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "owner": { "name": "raphael321", "url": "https://github.com/raphael321" },
   "plugins": [
     {

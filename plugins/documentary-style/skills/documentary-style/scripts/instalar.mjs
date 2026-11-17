@@ -41,7 +41,7 @@ if (pulados.length) console.log(`Já existiam, mantidos (${pulados.length}). Use
 const temMapa = fs.existsSync(path.join(projeto, 'public', 'doc', 'mapa', 'terra.jpg'));
 console.log(`
 Próximos passos:
-${temMapa ? '  - mapas: já existem em public/doc/mapa' : '  - mapas: node ' + path.join(aqui, 'baixar-mapas.mjs') + ' ' + path.join(projeto, 'public', 'doc', 'mapa')}
+${temMapa ? '  - mapas: já existem em public/doc/mapa' : '  - mapas: node ' + path.join(aqui, 'baixar-mapas.mjs') + ' ' + path.join(projeto, 'public', 'doc', 'mapa') + ' --hd'}
   - registre no Root.tsx:
       import { DocVideo, duracaoDoPlano } from './doc';
       import { PLANO_DEMO } from './doc/demo';

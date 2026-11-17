@@ -87,7 +87,7 @@ npx remotion still src/index.ts MeuVideo out/check/f0300.png --frame=300
 Checklist em cada quadro:
 - texto legível e dentro da área segura (90 px das bordas)
 - o pino ou a seta está no lugar certo do mapa (compare com um mapa de referência)
-- o mapa não está borrado: altura < 20° pede `terra-hd.jpg`, e altura < 4° pede recorte regional
+- o mapa não está borrado: altura < 20° pede `terra-hd.jpg` (testado até ~2,5°, nítido o bastante para vale), e abaixo de ~2° pede recorte regional
 - o crédito aparece em todo arquivo real
 - a legenda de lugar tem LOCAL e data
 

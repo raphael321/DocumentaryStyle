@@ -48,6 +48,7 @@ export const PLANO_DEMO: Plano = {
               { t: 3.2, lon: 10.4, lat: 44.6, altura: 3.2 },
               { t: 9.4, lon: 10.25, lat: 44.72, altura: 2.4 },
             ],
+            textura: 'doc/mapa/terra-hd.jpg', // zoom de vale: use a textura HD (baixar-mapas --hd)
             escurecer: 0.12,
             rios: { aos: 2.5 },
             paises: [{ iso: 'ITA', cor: COR.ouro, opacidade: 0.18, aos: 0 }],
