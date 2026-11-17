@@ -27,7 +27,8 @@ type Bloco = { tipo: 'arquivo'|'foto'|'documento'|'mapa'|'globo'|'barras'|'numer
 ## mapa: mapa real com câmera
 ```ts
 camera: { t, lon, lat, altura }[]   // altura = graus de latitude visíveis (zoom). Europa ~40, Itália ~13, região ~3
-textura?: 'doc/mapa/terra.jpg' | 'doc/mapa/terra-hd.jpg'
+textura?: 'doc/mapa/terra.jpg'      // base (5400 px). NÃO use terra-hd.jpg aqui: derruba a aba do render
+hd?: true | 'pasta/dos/blocos'     // satélite HD em blocos de 45° (blocos-hd.mjs); entra com altura < 30
 texturasExtras?: { src, oeste, sul, leste, norte }[]   // recortes de satélite de alta resolução
 escurecer?: 0.1
 paises?:   { iso, cor?, aos?, opacidade? (0.72), borda? }[]      // iso = ADM0_A3 (BRA, ITA, DEU...)

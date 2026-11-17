@@ -27,10 +27,28 @@ export type Area = { pontos: LonLat[]; cor?: string; aos?: number; opacidade?: n
 export type Circulo = { lon: number; lat: number; raioKm: number; aos?: number; cor?: string };
 export type TexturaExtra = Caixa & { src: string };
 
+const PASTA_HD = 'doc/mapa/hd';
+/** blocos de 45° (8 colunas x 4 linhas, gerados por blocos-hd.mjs) que cruzam a área visível */
+const blocosVisiveis = (vis: Caixa, pasta: string): TexturaExtra[] => {
+  const lista: TexturaExtra[] = [];
+  for (let lin = 0; lin < 4; lin++) {
+    for (let col = 0; col < 8; col++) {
+      const b = { oeste: -180 + col * 45, leste: -135 + col * 45, norte: 90 - lin * 45, sul: 45 - lin * 45 };
+      if (cruza(b, vis)) lista.push({ ...b, src: `${pasta}/${col}_${lin}.jpg` });
+    }
+  }
+  return lista;
+};
+
 export type PropsMapaReal = {
   /** quadros-chave da câmera (t em segundos dentro do bloco; altura = graus de latitude visíveis) */
   camera: QuadroCamera[];
   textura?: string;
+  /**
+   * satélite HD em blocos (scripts/blocos-hd.mjs): no zoom carrega só os blocos de 45° que aparecem na tela.
+   * true = pasta 'doc/mapa/hd'. Não use `textura: 'doc/mapa/terra-hd.jpg'`: a imagem inteira derruba a aba do render.
+   */
+  hd?: boolean | string;
   /** imagens de satélite mais detalhadas para regiões (recortes georreferenciados) */
   texturasExtras?: TexturaExtra[];
   /** escurece o satélite para os desenhos saltarem (0 a 0.6) */
@@ -53,6 +71,7 @@ export type PropsMapaReal = {
 export const MapaReal: React.FC<PropsMapaReal> = ({
   camera,
   textura = TEXTURA_TERRA,
+  hd = false,
   texturasExtras = [],
   escurecer = 0.1,
   paises = [],
@@ -84,11 +103,19 @@ export const MapaReal: React.FC<PropsMapaReal> = ({
 
   const ret = proj.retangulo({ oeste: -180, sul: -90, leste: 180, norte: 90 });
   const pulso = (frame % Math.round(fps * 1.6)) / (fps * 1.6);
+  const blocos = hd && cam.altura < 30 ? blocosVisiveis(proj.visivel, typeof hd === 'string' ? hd : PASTA_HD) : [];
 
   return (
     <AbsoluteFill style={{ backgroundColor: '#04070d', overflow: 'hidden' }}>
       {/* satélite */}
       <Img src={arquivo(textura)} style={{ position: 'absolute', ...ret, maxWidth: 'none', filter: 'saturate(1.18) contrast(1.06)' }} />
+      {blocos.map((b) => {
+        const r = proj.retangulo(b);
+        // +1 px para não aparecer costura entre blocos
+        return (
+          <Img key={b.src} src={arquivo(b.src)} style={{ position: 'absolute', left: r.left, top: r.top, width: r.width + 1, height: r.height + 1, maxWidth: 'none', filter: 'saturate(1.18) contrast(1.06)' }} />
+        );
+      })}
       {texturasExtras.map((t, i) => (
         <Img key={i} src={arquivo(t.src)} style={{ position: 'absolute', ...proj.retangulo(t), maxWidth: 'none', filter: 'saturate(1.1) contrast(1.04)' }} />
       ))}

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2 (2026-11-17)
+- Corrigido: o render do vídeo inteiro caía na cena do mapa com `terra-hd.jpg` (a aba do navegador estourava a memória).
+- Novo `scripts/blocos-hd.mjs`: corta o HD em 32 blocos de 45° (2700 px). `baixar-mapas.mjs --hd` já roda o corte.
+- `MapaReal` ganhou a prop `hd`: carrega só os blocos visíveis. A demo usa `hd: true`.
+- Vídeo de demonstração completo (48 s) renderizado do começo ao fim.
+
 ## 0.1.1 (2026-11-17)
 - Testada a textura HD da NASA (21600 px) no zoom do vale do Taro: relevo, rio Pó e Apeninos nítidos em altura ~2,5°.
 - `demo.ts` usa `terra-hd.jpg` na cena do mapa; `instalar.mjs` já sugere `baixar-mapas.mjs --hd`.

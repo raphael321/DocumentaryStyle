@@ -2,7 +2,7 @@
 // DocumentaryStyle: baixa os mapas reais (domínio público) para public/doc/mapa.
 // uso: node baixar-mapas.mjs <destino> [--hd]
 //   padrão (~13 MB): terra.jpg (NASA 5400x2700), paises-50m.geojson, rios-10m.geojson
-//   --hd  (+27 MB): terra-hd.jpg (NASA 21600x10800), para zoom em país/região
+//   --hd  (+27 MB): terra-hd.jpg (NASA 21600x10800), cortada em 32 blocos em hd/ para zoom em país/região
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -47,3 +47,13 @@ fs.writeFileSync(
   arquivos.map((a) => `${a.nome}: ${a.credito}\n  ${a.url}`).join('\n') + '\n',
 );
 console.log(`\nCréditos em ${path.join(destino, 'CREDITOS-MAPA.txt')}`);
+
+// o HD inteiro derruba o navegador do render: corta em blocos (usa o ffmpeg do Remotion, a partir do projeto)
+if (hd && !fs.existsSync(path.join(destino, 'hd', '7_3.jpg'))) {
+  const { spawnSync } = await import('node:child_process');
+  const { fileURLToPath } = await import('node:url');
+  const script = path.join(path.dirname(fileURLToPath(import.meta.url)), 'blocos-hd.mjs');
+  const projeto = path.resolve(destino, '..', '..', '..'); // <projeto>/public/doc/mapa
+  const r = spawnSync(process.execPath, [script, destino], { stdio: 'inherit', cwd: projeto });
+  if (r.status !== 0) console.log(`Corte em blocos falhou. Rode de dentro do projeto: node ${script} ${destino}`);
+}

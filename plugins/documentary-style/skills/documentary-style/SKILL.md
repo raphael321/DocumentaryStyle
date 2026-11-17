@@ -33,8 +33,10 @@ Não sobrescreve nada sem `--forcar`.
 Mapas: **pergunte ao usuário antes de baixar** e diga o tamanho de cada arquivo.
 ```bash
 node <pasta-da-skill>/scripts/baixar-mapas.mjs <projeto>/public/doc/mapa          # ~13 MB: NASA 5400px + países + rios
-node <pasta-da-skill>/scripts/baixar-mapas.mjs <projeto>/public/doc/mapa --hd     # +27 MB: NASA 21600px para zoom em país/região
+node <pasta-da-skill>/scripts/baixar-mapas.mjs <projeto>/public/doc/mapa --hd     # +27 MB: NASA 21600px, já cortada em 32 blocos (hd/) para zoom em país/região
 ```
+No mapa, ligue o HD com `hd: true`: ele carrega só os blocos que aparecem na tela.
+Se os blocos faltarem, rode `node <pasta-da-skill>/scripts/blocos-hd.mjs public/doc/mapa` de dentro do projeto.
 Para zoom de vale ou cidade, gere um recorte de satélite da região (Sentinel-2 cloudless 2016, CC BY 4.0).
 Esse script ainda é **experimental**: confira a imagem gerada antes de usar.
 ```bash
@@ -87,7 +89,7 @@ npx remotion still src/index.ts MeuVideo out/check/f0300.png --frame=300
 Checklist em cada quadro:
 - texto legível e dentro da área segura (90 px das bordas)
 - o pino ou a seta está no lugar certo do mapa (compare com um mapa de referência)
-- o mapa não está borrado: altura < 20° pede `terra-hd.jpg` (testado até ~2,5°, nítido o bastante para vale), e abaixo de ~2° pede recorte regional
+- o mapa não está borrado: altura < 20° pede `hd: true` (testado até ~2,5°, nítido o bastante para vale), e abaixo de ~2° pede recorte regional
 - o crédito aparece em todo arquivo real
 - a legenda de lugar tem LOCAL e data
 
@@ -97,7 +99,8 @@ npx remotion render src/index.ts MeuVideo out/meu-video.mp4
 ```
 
 ## Armadilhas que já aconteceram
-- **Mapa borrado no zoom**: a textura de 5400 px dá ~15 px por grau. Com `altura` de 3°, isso amplia 25 vezes. Use `terra-hd.jpg` ou `texturasExtras`.
+- **Mapa borrado no zoom**: a textura de 5400 px dá ~15 px por grau. Com `altura` de 3°, isso amplia 25 vezes. Use `hd: true` ou `texturasExtras`.
+- **Render trava ou a aba cai no mapa** ("Session closed", timeout): nunca passe `textura: 'doc/mapa/terra-hd.jpg'`. A imagem de 21600 px inteira estoura a memória do navegador. Use `hd: true` (blocos). Se sobrar `chrome-headless-shell` de um render que caiu, feche esses processos antes de tentar de novo.
 - **Wikimedia bloqueia miniatura grande** (erro 400/429): baixe a NASA direto de `assets.science.nasa.gov` (o script já faz isso).
 - **País não aparece**: o código é o `ADM0_A3` do Natural Earth (BRA, ITA, DEU, FRA, PRK, KOR, USA, RUS…), não o nome.
 - **Globo com país atrás do horizonte**: ele é desenhado colado na borda. Gire a câmera até o país estar de frente antes de destacá-lo.
