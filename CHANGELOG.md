@@ -10,6 +10,8 @@
 - Tema por cena (`cena.tema`), personalização (`{ base, cor, fonte, fundo, ornamento }`) e `cena.moldura: false`.
 - Os componentes leem as cores e fontes com `useTema()`. `COR`/`FONTE` continuam valendo (cores do tema padrão).
 - O arquivo real não muda: o tema só ajusta filtro, granulação, legenda e fontes por cima dele.
+- **Mistura de temas**: `{ base, variar, cartoesDe }` e `MISTURAS` prontas (ex.: guerra = sonar + investigação + fumaça).
+- `arquivo` ganhou `modo: 'painel'` com `etiqueta`: o material real num painel sobre o fundo do tema.
 - Testado com stills de documento, número, quadro de ligações, barras e arquivo em todos os temas (Remotion 4.0.540).
 
 ## 0.1.2 (2026-11-17)

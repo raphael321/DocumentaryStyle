@@ -10,6 +10,8 @@ type Enquadramento = { escala: number; x: number; y: number };
  * Vídeo ou foto de arquivo ocupando a TELA INTEIRA.
  * - modo 'cobrir': corta as bordas para preencher 16:9 (padrão)
  * - modo 'desfocado': material 4:3 ou vertical inteiro no centro, com o próprio material desfocado preenchendo atrás
+ * - modo 'painel': o material vai num painel 16:9 sobre o fundo do tema, com etiqueta (estilo investigação).
+ *   Use para variar o ritmo sem tirar o material real da tela. Ponha `fundo: 'doc'` na cena.
  * - kenBurns: movimento lento de câmera (foto e vídeo). Padrão: aproximação suave.
  */
 export const Arquivo: React.FC<{
@@ -18,7 +20,9 @@ export const Arquivo: React.FC<{
   inicioSeg?: number;
   volume?: number;
   pb?: boolean;
-  modo?: 'cobrir' | 'desfocado';
+  modo?: 'cobrir' | 'desfocado' | 'painel';
+  /** texto da etiqueta no modo painel (ex.: 'ARQUIVO · FEB, 1945') */
+  etiqueta?: string;
   kenBurns?: { de: Enquadramento; para: Enquadramento } | false;
   legenda?: { local: string; data?: string };
   credito?: string;
@@ -33,6 +37,7 @@ export const Arquivo: React.FC<{
   kenBurns,
   legenda,
   credito,
+  etiqueta,
   graos: graosProp,
 }) => {
   const T = useTema();
@@ -59,6 +64,57 @@ export const Arquivo: React.FC<{
     ) : (
       <Img src={arquivo(src)} style={{ width: '100%', height: '100%', objectFit: fit, filter: filtro, ...extra }} />
     );
+
+  if (modo === 'painel') {
+    const W = 1440, H = 810;
+    const flash = interpolate(frame, [0, 4], [0.7, 0], { extrapolateRight: 'clamp' });
+    const entra = mola(frame, fps, 0, 140, 18);
+    return (
+      <AbsoluteFill>
+        <div
+          style={{
+            position: 'absolute',
+            left: (1920 - W) / 2,
+            top: (1080 - H) / 2 + 10,
+            width: W,
+            height: H,
+            border: '1px solid rgba(255,255,255,0.22)',
+            boxShadow: '0 30px 80px rgba(0,0,0,0.7)',
+            background: '#000',
+            overflow: 'hidden',
+            opacity: Math.min(1, entra * 1.5),
+            transform: `scale(${0.97 + entra * 0.03})`,
+          }}
+        >
+          <AbsoluteFill style={{ transform: `scale(${escala}) translate(${x}%, ${y}%)` }}>{midia('cover')}</AbsoluteFill>
+          <Granulacao intensidade={graos} />
+          <AbsoluteFill style={{ background: '#fff', opacity: flash }} />
+        </div>
+        {etiqueta && (
+          <div
+            style={{
+              position: 'absolute',
+              left: (1920 - W) / 2,
+              top: (1080 - H) / 2 - 30,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 17,
+              letterSpacing: 1.5,
+              color: 'rgba(236,234,228,0.7)',
+              opacity: entra,
+            }}
+          >
+            <div style={{ width: 6, height: 13, background: T.cor.vermelho }} />
+            {etiqueta}
+          </div>
+        )}
+        {legenda && <Legenda local={legenda.local} data={legenda.data} />}
+        {credito && <Credito texto={credito} />}
+      </AbsoluteFill>
+    );
+  }
 
   return (
     <AbsoluteFill style={{ backgroundColor: '#000', overflow: 'hidden' }}>

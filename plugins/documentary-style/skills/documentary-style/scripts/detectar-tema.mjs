@@ -3,7 +3,7 @@
 // uso: node detectar-tema.mjs ROTEIRO.md [BRIEFING.md ...] [--cenas] [--json]
 //   --cenas  também sugere o tema de cada cena (seções "### Cena ..." ou "## ...")
 //   --json   saída em JSON (para outro script ler)
-// O resultado vai no Plano: `tema: 'guerra'`. Para trocar só uma cena: `tema` dentro da cena.
+// O resultado vai no Plano: `tema: 'guerra'` (puro) ou `tema: MISTURAS.guerra` (variado). Para trocar só uma cena: `tema` dentro da cena.
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -171,6 +171,7 @@ if (ehPrincipal) {
     console.log(`Pistas: ${geral.pistas.join(', ') || '-'}`);
     console.log(`Pontos: ${Object.entries(geral.pontos).map(([t, v]) => `${t} ${v}`).join(' · ')}`);
     for (const c of cenas.filter((c) => c.trocar)) console.log(`  cena "${c.cena}": sugere tema '${c.tema}'`);
-    console.log(`\nNo plano: export const PLANO = { tema: '${geral.tema}', cenas: [...] }`);
+    console.log(`\nNo plano (tema puro):  tema: '${geral.tema}'`);
+    console.log(`No plano (misturado, varia o fundo entre as cenas gráficas):  import { MISTURAS } from '../doc';  tema: MISTURAS.${geral.tema}`);
   }
 }

@@ -653,7 +653,7 @@ export const OrnamentoTela: React.FC = () => {
 /** Vai DENTRO de um cartão de papel (position: relative). Desenha o enfeite do tema por cima das bordas. */
 export const OrnamentoCartao: React.FC = () => {
   const T = useTema();
-  const o = T.ornamento;
+  const o = T.ornamentoCartao ?? T.ornamento;
   const abs: React.CSSProperties = { position: 'absolute', pointerEvents: 'none' };
   if (o === 'nenhum' || o === 'hud') return null;
   if (o === 'sonar')

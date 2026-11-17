@@ -62,6 +62,10 @@ Ponha o resultado no plano (`tema: 'guerra'`) e diga ao usuário qual tema saiu 
 - Confiança baixa ou dois temas fortes (ex.: submarino na guerra = guerra + mar): fique com o primeiro e cite o segundo.
 - `--cenas` aponta cena que fala claramente de outro assunto; só nesses casos use `tema` dentro da cena.
 - Para ajustar cores ou fundo: `tema: { base: 'realeza', cor: { ouro: '#e0c068' } }`.
+- **Mistura (recomendado para vídeo longo):** `tema: MISTURAS.guerra` mantém as cores e fontes do tema, mas alterna o
+  fundo das cenas gráficas (sonar → quadrícula de investigação → fumaça) e usa os cartões da investigação. Fica variado
+  sem perder a seriedade. Monte a sua com `{ base, variar: [...], cartoesDe }`.
+- Para variar o arquivo sem tirá-lo da tela: `arquivo` com `modo: 'painel'` e `etiqueta` (painel 16:9 sobre o fundo do tema).
 - O tema muda **só as cenas gráficas** e o acabamento do arquivo. Continue intercalando fotos e vídeos reais (regras abaixo).
 
 ### 3. Roteiro → plano

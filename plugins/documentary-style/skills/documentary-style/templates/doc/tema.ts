@@ -52,6 +52,8 @@ export type Tema = {
   papelEscuro: boolean;
   fundo: EstiloFundo;
   ornamento: EstiloOrnamento;
+  /** enfeite dos cartões, quando diferente do da tela (vem de `cartoesDe` numa mistura) */
+  ornamentoCartao?: EstiloOrnamento;
   /** filtro CSS aplicado ao vídeo/foto de arquivo quando a cena não pede `pb` */
   filtroArquivo: string;
   /** granulação padrão por cima do arquivo */
@@ -68,8 +70,16 @@ export type TemaPersonalizado = {
   papelEscuro?: boolean;
   fundo?: EstiloFundo;
   ornamento?: EstiloOrnamento;
+  ornamentoCartao?: EstiloOrnamento;
   filtroArquivo?: string;
   graos?: number;
+  /**
+   * MISTURA: as cenas gráficas alternam o fundo e a moldura entre o tema base e estes temas,
+   * sempre com as cores e fontes do base (ex.: sonar → quadrícula de investigação → fumaça).
+   */
+  variar?: TemaId[];
+  /** MISTURA: os cartões de papel (documento, foto, quadro) seguem o visual deste tema. */
+  cartoesDe?: TemaId;
 };
 
 export type EscolhaTema = TemaId | TemaPersonalizado;
@@ -364,24 +374,57 @@ export const TEMAS: Record<TemaId, Tema> = {
   },
 };
 
-/** Transforma o que veio do Plano (id ou personalização) num tema completo. */
-export const resolverTema = (escolha?: EscolhaTema | Tema): Tema => {
+/**
+ * Transforma o que veio do Plano (id ou personalização) num tema completo.
+ * `variacao` é a posição da cena gráfica no vídeo: numa mistura, escolhe qual fundo usar.
+ */
+export const resolverTema = (escolha?: EscolhaTema | Tema, variacao = 0): Tema => {
   if (!escolha) return TEMAS.padrao;
   if (typeof escolha === 'string') return TEMAS[escolha] ?? TEMAS.padrao;
   if ('id' in escolha) return escolha;
   const b = TEMAS[escolha.base] ?? TEMAS.padrao;
+  const ciclo = [escolha.base, ...(escolha.variar ?? [])];
+  const v = TEMAS[ciclo[((variacao % ciclo.length) + ciclo.length) % ciclo.length]] ?? b;
+  const c = escolha.cartoesDe ? TEMAS[escolha.cartoesDe] : undefined;
+  const corCartao = c
+    ? {
+        papel: c.cor.papel,
+        papelClaro: c.cor.papelClaro,
+        papelBorda: c.cor.papelBorda,
+        tinta: c.cor.tinta,
+        tintaSuave: c.cor.tintaSuave,
+        marcaTexto: c.cor.marcaTexto,
+      }
+    : {};
+  const variando = v.id !== b.id;
   return {
     ...b,
     ...(escolha.nome ? { nome: escolha.nome } : {}),
-    cor: { ...b.cor, ...escolha.cor },
-    fonte: { ...b.fonte, ...escolha.fonte },
-    documentoItalico: escolha.documentoItalico ?? b.documentoItalico,
-    papelEscuro: escolha.papelEscuro ?? b.papelEscuro,
-    fundo: escolha.fundo ?? b.fundo,
-    ornamento: escolha.ornamento ?? b.ornamento,
+    cor: { ...b.cor, ...corCartao, ...escolha.cor },
+    fonte: { ...b.fonte, ...(c ? { documento: c.fonte.documento } : {}), ...escolha.fonte },
+    documentoItalico: escolha.documentoItalico ?? c?.documentoItalico ?? b.documentoItalico,
+    papelEscuro: escolha.papelEscuro ?? c?.papelEscuro ?? b.papelEscuro,
+    fundo: variando ? v.fundo : escolha.fundo ?? b.fundo,
+    ornamento: variando ? v.ornamento : escolha.ornamento ?? b.ornamento,
+    ornamentoCartao: escolha.ornamentoCartao ?? c?.ornamento ?? b.ornamentoCartao,
     filtroArquivo: escolha.filtroArquivo ?? b.filtroArquivo,
     graos: escolha.graos ?? b.graos,
   };
+};
+
+/**
+ * Misturas prontas: variadas, mas sérias. O detector de tema sugere a mistura do tema que encontrar.
+ * Uso: `tema: MISTURAS.guerra`.
+ */
+export const MISTURAS: Partial<Record<TemaId, TemaPersonalizado>> = {
+  // sonar + quadrícula de perícia + fumaça de carta militar; documentos como transcrição em papel
+  guerra: { base: 'guerra', nome: 'Guerra mista (sonar + investigação)', variar: ['investigacao', 'guerraClassica'], cartoesDe: 'investigacao' },
+  // perícia + sonar (varredura combina com radar, caixa-preta e busca)
+  investigacao: { base: 'investigacao', nome: 'Investigação mista', variar: ['guerra'] },
+  realeza: { base: 'realeza', nome: 'Realeza mista', variar: ['investigacao'] },
+  ditadura: { base: 'ditadura', nome: 'Ditadura mista', variar: ['investigacao', 'guerraClassica'] },
+  mar: { base: 'mar', nome: 'Mar misto (carta náutica + sonar)', variar: ['guerra'] },
+  antiguidade: { base: 'antiguidade', nome: 'Antiguidade mista', variar: ['investigacao'] },
 };
 
 const TemaContexto = createContext<Tema>(TEMAS.padrao);
@@ -390,8 +433,11 @@ const TemaContexto = createContext<Tema>(TEMAS.padrao);
 export const useTema = () => useContext(TemaContexto);
 
 /** Aplica um tema a tudo que estiver dentro. O DocVideo já faz isso sozinho. */
-export const ProvedorTema: React.FC<{ tema?: EscolhaTema | Tema; children: React.ReactNode }> = ({ tema, children }) =>
-  React.createElement(TemaContexto.Provider, { value: resolverTema(tema) }, children);
+export const ProvedorTema: React.FC<{ tema?: EscolhaTema | Tema; variacao?: number; children: React.ReactNode }> = ({
+  tema,
+  variacao = 0,
+  children,
+}) => React.createElement(TemaContexto.Provider, { value: resolverTema(tema, variacao) }, children);
 
 // Compatibilidade: COR e FONTE continuam sendo as cores e fontes do tema padrão.
 // Use para cores com SIGNIFICADO fixo no plano (um lado do conflito = uma cor), não para o visual do tema.

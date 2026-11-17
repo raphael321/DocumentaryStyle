@@ -23,10 +23,16 @@ Os componentes leem o tema com `useTema()` (`T.cor.ouro`, `T.fonte.titulo`...). 
 sempre as cores do tema padrão: use-as no plano para cores com significado fixo (um lado do conflito = uma cor).
 Fora do `DocVideo`, envolva com `<ProvedorTema tema="guerra">`. `TEMAS` lista todos os temas prontos.
 
+Mistura: `{ base: 'guerra', variar: ['investigacao', 'guerraClassica'], cartoesDe: 'investigacao' }`. A cada cena com
+`fundo: 'doc'` o fundo e a moldura da tela passam para o próximo tema da lista; cores, fontes e filtro do arquivo ficam
+os do `base`. `cartoesDe` copia papel, tinta, marca-texto, fonte do documento e enfeite dos cartões. `MISTURAS` tem uma
+mistura pronta por tema.
+
 ## arquivo: vídeo/foto real em tela cheia
 `src`, `tipo?: 'video'|'foto'` (é detectado pela extensão), `inicioSeg?` (corte inicial do vídeo), `volume?` (0 = mudo),
 `pb?`, `modo?: 'cobrir'|'desfocado'`, `kenBurns?: { de: {escala,x,y}, para: {escala,x,y} } | false`,
-`legenda?: { local, data? }`, `credito?`, `graos?` (0.07).
+`legenda?: { local, data? }`, `credito?`, `graos?` (do tema), `etiqueta?` (modo painel).
+`modo: 'painel'` põe o material num painel 16:9 com etiqueta sobre o fundo do tema (use `fundo: 'doc'` na cena).
 
 ## foto: foto em moldura de papel
 `src`, `legenda?`, `sub?`, `credito?`, `rotacao?` (-2), `largura?` (760), `x?`/`y?` (centro em %), `pb?`, `aos?`.

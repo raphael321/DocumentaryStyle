@@ -88,6 +88,7 @@ export const DocVideo: React.FC<{ plano: Plano }> = ({ plano }) => {
   const { fps } = useVideoConfig();
   const fusao = plano.fusao ?? 0.4;
   let inicio = 0;
+  let graficas = 0; // posição da cena gráfica: numa mistura de temas, alterna o fundo
   return (
     <AbsoluteFill style={{ backgroundColor: '#000' }}>
       {plano.cenas.map((cena, i) => {
@@ -95,10 +96,11 @@ export const DocVideo: React.FC<{ plano: Plano }> = ({ plano }) => {
         const durVisual = Math.round((cena.duracao + (i < plano.cenas.length - 1 ? fusao : 0)) * fps);
         const durAudio = Math.round(cena.duracao * fps);
         inicio += cena.duracao;
+        const variacao = (cena.fundo ?? 'doc') === 'doc' ? graficas++ : 0;
         return (
           <React.Fragment key={cena.id}>
             <Sequence from={de} durationInFrames={durVisual} name={`cena ${cena.id}`}>
-              <ProvedorTema tema={cena.tema ?? plano.tema}>
+              <ProvedorTema tema={cena.tema ?? plano.tema} variacao={variacao}>
               <EntradaCena fusao={i === 0 ? 0 : fusao}>
                 {(cena.fundo ?? 'doc') === 'doc' && <FundoDoc semente={cena.id} moldura={cena.moldura ?? true} />}
                 {cena.fundo === 'preto' && <AbsoluteFill style={{ backgroundColor: '#000' }} />}
