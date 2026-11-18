@@ -50,7 +50,9 @@ mistura pronta por tema.
 camera: { t, lon, lat, altura }[]   // altura = graus de latitude visíveis (zoom). Europa ~40, Itália ~13, região ~3
 textura?: 'doc/mapa/terra.jpg'      // base (5400 px). NÃO use terra-hd.jpg aqui: derruba a aba do render
 hd?: true | 'pasta/dos/blocos'     // satélite HD em blocos de 45° (blocos-hd.mjs); entra com altura < 30
-texturasExtras?: { src, oeste, sul, leste, norte }[]   // recortes de satélite de alta resolução
+satelite?: false | { pasta?, url?, zoomMax?, credito? }  // padrão {}: blocos Sentinel-2 de public/doc/mapa/tiles (baixar-tiles.mjs)
+                                    // lê tiles/indice.json; sem índice não muda nada. { url: '.../{z}/{x}/{y}.jpg' } busca na hora
+texturasExtras?: { src, oeste, sul, leste, norte, opcional? }[]   // recortes de satélite de alta resolução
 escurecer?: 0.1
 paises?:   { iso, cor?, aos?, opacidade? (0.72), borda? }[]      // iso = ADM0_A3 (BRA, ITA, DEU...)
 rios?:     boolean | { cor?, aos? }

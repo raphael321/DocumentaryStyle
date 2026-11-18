@@ -1,6 +1,10 @@
 # Changelog
 
 ## 0.2.0 (2026-11-17)
+- Novo: **mapa em alta resolução no zoom**. `scripts/baixar-tiles.mjs` baixa blocos de satélite Sentinel-2 cloudless 2016
+  (~10 m/px, CC BY 4.0) só no caminho das câmeras do plano (`camerasDoPlano`). O `MapaReal` usa os blocos sozinho
+  (prop `satelite`, ligada por padrão), troca para o bloco nítido em cada quadro e põe o crédito no canto.
+  Alinhamento conferido contra as fronteiras e rios do Natural Earth (sem deslocamento visível).
 - Novo: **curtir + inscreva-se + sininho** em todo vídeo (`plano.inscreva`, ligado por padrão): entra depois do gancho,
   a cada ~6 min e perto do fim, com cursor animado e cliques/sino baixinhos. Novo efeito `sino` no `gerar-sons.py`
   (e a opção `--so-efeitos`).

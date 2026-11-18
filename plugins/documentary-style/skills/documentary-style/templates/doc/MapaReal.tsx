@@ -1,7 +1,8 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { AbsoluteFill, cancelRender, continueRender, delayRender, useCurrentFrame, useVideoConfig } from 'remotion';
 import { useTema } from './tema';
-import { carregarImagem, mola, surgir } from './base';
+import { carregarImagem, carregarJson, mola, surgir, useRecurso } from './base';
+import { CREDITO_TILES_PADRAO, IndiceTiles, PASTA_TILES, tilesParaTela } from './tiles';
 import {
   Caixa,
   LonLat,
@@ -15,6 +16,7 @@ import {
   usePaises,
   useRios,
 } from './geo';
+import { Credito } from './Textos';
 import { LinhaAnimada, Medalhao, Pino, Rotulo } from './Marcadores';
 
 export type PaisDestaque = { iso: string; cor?: string; aos?: number; opacidade?: number; borda?: string };
@@ -25,7 +27,7 @@ export type MedalhaoMapa = { lon: number; lat: number; foto: string; nome?: stri
 export type RotuloMapa = { lon: number; lat: number; texto: string; sub?: string; aos?: number; tamanho?: number };
 export type Area = { pontos: LonLat[]; cor?: string; aos?: number; opacidade?: number; borda?: string };
 export type Circulo = { lon: number; lat: number; raioKm: number; aos?: number; cor?: string };
-export type TexturaExtra = Caixa & { src: string };
+export type TexturaExtra = Caixa & { src: string; /** se não carregar, só pula (blocos baixados sob demanda) */ opcional?: boolean };
 
 /**
  * Desenha as camadas de satélite num canvas do tamanho da tela. Cada imagem entra só com o pedaço visível
@@ -40,14 +42,24 @@ const Satelite: React.FC<{
 }> = ({ camadas, retangulo, largura, altura }) => {
   const T = useTema();
   const ref = useRef<HTMLCanvasElement>(null);
-  const [imgs, setImgs] = useState<Record<string, HTMLImageElement>>({});
-  const faltam = camadas.map((c) => c.src).filter((s) => !imgs[s]);
+  const [imgs, setImgs] = useState<Record<string, HTMLImageElement | null>>({});
+  const faltam = camadas.map((c) => c.src).filter((s) => !(s in imgs));
+  const opcionais = new Set(camadas.filter((c) => c.opcional).map((c) => c.src));
   const chaveFaltam = faltam.join('|');
   const handle = useMemo(() => (faltam.length ? delayRender(`DocumentaryStyle: satélite ${chaveFaltam}`) : null), [chaveFaltam]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (handle === null) return;
     let vivo = true;
-    Promise.all(faltam.map((s) => carregarImagem(s).then((img) => [s, img] as const)))
+    Promise.all(
+      faltam.map((s) =>
+        carregarImagem(s)
+          .then((img) => [s, img] as const)
+          .catch((e) => {
+            if (opcionais.has(s)) return [s, null] as const;
+            throw e;
+          }),
+      ),
+    )
       .then((lista) => {
         if (vivo) setImgs((antes) => ({ ...antes, ...Object.fromEntries(lista) }));
         continueRender(handle);
@@ -106,6 +118,12 @@ export type PropsMapaReal = {
    * true = pasta 'doc/mapa/hd'. Não use `textura: 'doc/mapa/terra-hd.jpg'`: a imagem inteira derruba a aba do render.
    */
   hd?: boolean | string;
+  /**
+   * Satélite em ALTA por blocos (Sentinel-2, ~10 m/px) no zoom: ligado por padrão. Usa os blocos que
+   * scripts/baixar-tiles.mjs baixou em public/doc/mapa/tiles (lê tiles/indice.json; sem ele, nada muda).
+   * `{ url }` pede os blocos direto da internet na hora do render. false desliga.
+   */
+  satelite?: false | { pasta?: string; url?: string; zoomMax?: number; credito?: string | false };
   /** imagens de satélite mais detalhadas para regiões (recortes georreferenciados) */
   texturasExtras?: TexturaExtra[];
   /** escurece o satélite para os desenhos saltarem (0 a 0.6) */
@@ -130,6 +148,7 @@ export const MapaReal: React.FC<PropsMapaReal> = ({
   textura = TEXTURA_TERRA,
   hd = false,
   texturasExtras = [],
+  satelite = {},
   escurecer = 0.1,
   paises = [],
   rios = false,
@@ -159,11 +178,26 @@ export const MapaReal: React.FC<PropsMapaReal> = ({
     [listaRios, Math.round(proj.visivel.oeste), Math.round(proj.visivel.norte), Math.round(cam.altura)],
   );
 
+  // blocos de alta resolução onde a câmera está
+  const pastaTiles = satelite ? satelite.pasta ?? PASTA_TILES : null;
+  const indice = useRecurso<IndiceTiles | null>(
+    satelite && !satelite.url ? `${pastaTiles}/indice.json` : null,
+    () => carregarJson<IndiceTiles>(`${pastaTiles}/indice.json`).catch(() => null),
+  );
+  const disponiveis = useMemo(() => (indice ? new Set(indice.tiles) : null), [indice]);
+  const tiles =
+    satelite && (disponiveis || satelite.url)
+      ? tilesParaTela(proj.visivel, proj.sx, { pasta: pastaTiles ?? undefined, url: satelite.url, zoomMax: satelite.zoomMax ?? indice?.zoomMax }, disponiveis)
+      : [];
+  const creditoTiles =
+    tiles.length && satelite && satelite.credito !== false ? satelite.credito ?? indice?.credito ?? CREDITO_TILES_PADRAO : null;
+
   const pulso = (frame % Math.round(fps * 1.6)) / (fps * 1.6);
   const blocos = hd && cam.altura < 30 ? blocosVisiveis(proj.visivel, typeof hd === 'string' ? hd : PASTA_HD) : [];
   const camadas: TexturaExtra[] = [
     { src: textura, oeste: -180, sul: -90, leste: 180, norte: 90 },
     ...blocos,
+    ...tiles,
     ...texturasExtras.filter((t) => cruza(t, proj.visivel)),
   ];
 
@@ -270,6 +304,7 @@ export const MapaReal: React.FC<PropsMapaReal> = ({
         })}
       </AbsoluteFill>
       <AbsoluteFill style={{ background: 'radial-gradient(ellipse at center, rgba(0,0,0,0) 60%, rgba(0,0,0,0.5) 100%)', pointerEvents: 'none' }} />
+      {creditoTiles && <Credito texto={creditoTiles} />}
     </AbsoluteFill>
   );
 };

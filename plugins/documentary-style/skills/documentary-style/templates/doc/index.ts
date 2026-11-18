@@ -15,3 +15,5 @@ export { eventosDeSom, conferirPlano } from './Som';
 export type { LonLat, QuadroCamera, QuadroGlobo } from './geo';
 export { BotaoInscreva, momentosInscreva, DURACAO_INSCREVA, TEMPOS_INSCREVA } from './Inscreva';
 export type { Inscreva } from './Inscreva';
+export { camerasDoPlano, tilesParaTela, caixaDoTile, PASTA_TILES, URL_TILES_PADRAO, CREDITO_TILES_PADRAO } from './tiles';
+export type { IndiceTiles } from './tiles';

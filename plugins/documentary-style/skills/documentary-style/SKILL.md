@@ -36,13 +36,21 @@ Mapas: **pergunte ao usuário antes de baixar** e diga o tamanho de cada arquivo
 node <pasta-da-skill>/scripts/baixar-mapas.mjs <projeto>/public/doc/mapa          # ~13 MB: NASA 5400px + países + rios
 node <pasta-da-skill>/scripts/baixar-mapas.mjs <projeto>/public/doc/mapa --hd     # +27 MB: NASA 21600px, já cortada em 32 blocos (hd/) para zoom em país/região
 ```
-No mapa, ligue o HD com `hd: true`: ele carrega só os blocos que aparecem na tela.
-Se os blocos faltarem, rode `node <pasta-da-skill>/scripts/blocos-hd.mjs public/doc/mapa` de dentro do projeto.
-Para zoom de vale ou cidade, gere um recorte de satélite da região (Sentinel-2 cloudless 2016, CC BY 4.0).
-Esse script ainda é **experimental**: confira a imagem gerada antes de usar.
+**Satélite em alta (padrão para todo mapa com zoom).** A textura base (NASA 5400 px) só aguenta continente e país.
+Para região, vale e cidade, o `MapaReal` já usa sozinho blocos de satélite **Sentinel-2 (~10 m/px)** onde a câmera
+está, desde que eles tenham sido baixados. Depois de escrever o plano, rode de dentro do projeto (precisa de internet;
+pergunte antes e diga o tamanho que o `--simular` mostrar, normalmente 10 a 40 MB por vídeo):
 ```bash
-node <pasta-da-skill>/scripts/recortar-regiao.mjs --oeste 9.6 --sul 44.3 --leste 10.7 --norte 45.0 --nome taro --saida <projeto>/public/doc/mapa
+npx tsx -e "import {camerasDoPlano} from './src/doc'; import {PLANO} from './src/<slug>/plano'; console.log(JSON.stringify(camerasDoPlano(PLANO)))" > cameras.json
+node <pasta-da-skill>/scripts/baixar-tiles.mjs --cameras cameras.json --simular   # quantos blocos e MB
+node <pasta-da-skill>/scripts/baixar-tiles.mjs --cameras cameras.json             # baixa para public/doc/mapa/tiles
 ```
+Ele só baixa os blocos do caminho de cada câmera (no zoom certo e um abaixo, para a transição) e grava
+`tiles/indice.json`. O mapa lê o índice, escolhe o bloco nítido para cada quadro e põe o crédito
+"Sentinel-2 cloudless 2016 · s2maps.eu · EOX (CC BY 4.0)" no canto. Mudou a câmera? Rode de novo: só baixa o que falta.
+Fonte: Sentinel-2 cloudless **2016** (CC BY 4.0, pode em canal monetizado). Os anos seguintes da EOX são não comerciais: não troque a `--url` por eles.
+`hd: true` (blocos NASA de 45°, `baixar-mapas.mjs --hd`) continua valendo como meio-termo para países inteiros.
+`recortar-regiao.mjs` (um recorte só, experimental) ficou para casos especiais; prefira o `baixar-tiles.mjs`.
 Depois registre a composição no `Root.tsx`:
 ```tsx
 import { DocVideo, duracaoDoPlano } from './doc';
@@ -130,7 +138,7 @@ npx remotion still src/index.ts MeuVideo out/check/f0300.png --frame=300
 Checklist em cada quadro:
 - texto legível e dentro da área segura (90 px das bordas)
 - o pino ou a seta está no lugar certo do mapa (compare com um mapa de referência)
-- o mapa não está borrado: altura < 20° pede `hd: true` (aceitável até ~1,2°), e abaixo disso pede recorte regional
+- o mapa não está borrado: com zoom (altura < ~10°) os blocos do `baixar-tiles.mjs` precisam estar baixados; o crédito do satélite aparece no canto quando eles entram
 - o crédito aparece em todo arquivo real
 - a legenda de lugar tem LOCAL e data
 - o fundo e a moldura combinam com o tema e não brigam com o texto do cartão
