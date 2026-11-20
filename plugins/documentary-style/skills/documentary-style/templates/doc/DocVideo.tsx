@@ -7,6 +7,9 @@ import { MapaReal } from './MapaReal';
 import { GloboReal } from './GloboReal';
 import { ComparacaoBarras, LinhaDoTempo, NumeroGrande } from './Graficos';
 import { QuadroConexoes } from './QuadroConexoes';
+import { EscolhaTema, ProvedorTema, Ritmo } from './tema';
+import { SomDoPlano } from './Som';
+import { BotaoInscreva, DURACAO_INSCREVA, Inscreva, momentosInscreva } from './Inscreva';
 
 type P<C extends React.FC<any>> = React.ComponentProps<C>;
 type Tempo = { inicio?: number; duracao?: number };
@@ -33,16 +36,53 @@ export type CenaPlano = {
   duracao: number;
   /** narração da cena, ex.: 'fornovo/cena3.mp3' (dentro de public/) */
   audio?: string;
-  /** 'doc' = azul-noite com estrelas (padrão), 'preto' ou 'nenhum' */
+  /** segundos de respiro antes da narração começar (padrão 0) */
+  audioInicio?: number;
+  /** duração real da narração, para a trilha abaixar só enquanto há fala (padrão: até o fim da cena) */
+  audioDuracao?: number;
+  /** 'doc' = fundo do tema (padrão), 'preto' ou 'nenhum' */
   fundo?: 'doc' | 'preto' | 'nenhum';
+  /** troca o tema só nesta cena (ex.: uma cena sobre o rei num vídeo de guerra) */
+  tema?: EscolhaTema;
+  /** false tira a moldura do tema (cantos, faixas) desta cena */
+  moldura?: boolean;
   blocos: Bloco[];
 };
 
+/** Som automático: trilha do tema (sempre abaixo da locução) e efeitos de acordo com o ritmo. */
+export type Som = {
+  /** 'auto' = trilha do tema em doc/sons/trilhas · { src } = música do canal · false = sem trilha */
+  trilha?: 'auto' | { src: string; volume?: number } | false;
+  /** 'serio' (padrão): efeitos suaves e movimento lento · 'dinamico': efeitos mais vivos, fusões curtas */
+  ritmo?: Ritmo;
+  /** false desliga os efeitos */
+  efeitos?: boolean;
+  /** multiplicadores de volume (1 = padrão). A trilha nunca passa da voz: o ducking continua valendo. */
+  volumeTrilha?: number;
+  volumeEfeitos?: number;
+  /** pasta dos sons dentro de public/ (padrão 'doc/sons') e extensão das trilhas (padrão 'mp3') */
+  pasta?: string;
+  extensao?: 'mp3' | 'wav';
+};
+
 export type Plano = {
+  /**
+   * Visual do vídeo: 'padrao' | 'guerra' | 'realeza' | 'ditadura' | 'aviacao' | 'mar' | 'antiguidade' | 'crime',
+   * ou { base: 'realeza', cor: { ouro: '#...' } } para personalizar.
+   * Descubra o tema do roteiro com scripts/detectar-tema.mjs.
+   */
+  tema?: EscolhaTema;
   cenas: CenaPlano[];
-  /** fusão entre cenas, em segundos (padrão 0.4) */
+  /** trilha e efeitos automáticos (gere os arquivos com scripts/gerar-sons.py) */
+  som?: Som;
+  /** fusão entre cenas, em segundos (padrão 0.5 no ritmo sério e 0.3 no dinâmico) */
   fusao?: number;
   trilha?: { src: string; volume?: number };
+  /**
+   * Chamada de curtir + inscreva-se + sininho. Vem LIGADA por padrão (depois do gancho, a cada ~6 min e perto do fim).
+   * { momentos: [12, 230] } escolhe os instantes; { chamada: '...' } põe uma frase acima; false desliga.
+   */
+  inscreva?: Inscreva;
 };
 
 const RENDER: { [K in Bloco['tipo']]: React.FC<any> } = {
@@ -75,8 +115,10 @@ const EntradaCena: React.FC<{ fusao: number; children: React.ReactNode }> = ({ f
 export const DocVideo: React.FC<{ plano: Plano }> = ({ plano }) => {
   useFontesDoc();
   const { fps } = useVideoConfig();
-  const fusao = plano.fusao ?? 0.4;
+  const ritmo: Ritmo = plano.som?.ritmo ?? 'serio';
+  const fusao = plano.fusao ?? (plano.som ? (ritmo === 'dinamico' ? 0.3 : 0.5) : 0.4);
   let inicio = 0;
+  let graficas = 0; // posição da cena gráfica: numa mistura de temas, alterna o fundo
   return (
     <AbsoluteFill style={{ backgroundColor: '#000' }}>
       {plano.cenas.map((cena, i) => {
@@ -84,11 +126,13 @@ export const DocVideo: React.FC<{ plano: Plano }> = ({ plano }) => {
         const durVisual = Math.round((cena.duracao + (i < plano.cenas.length - 1 ? fusao : 0)) * fps);
         const durAudio = Math.round(cena.duracao * fps);
         inicio += cena.duracao;
+        const variacao = (cena.fundo ?? 'doc') === 'doc' ? graficas++ : 0;
         return (
           <React.Fragment key={cena.id}>
             <Sequence from={de} durationInFrames={durVisual} name={`cena ${cena.id}`}>
+              <ProvedorTema tema={cena.tema ?? plano.tema} variacao={variacao} ritmo={ritmo}>
               <EntradaCena fusao={i === 0 ? 0 : fusao}>
-                {(cena.fundo ?? 'doc') === 'doc' && <FundoDoc semente={cena.id} />}
+                {(cena.fundo ?? 'doc') === 'doc' && <FundoDoc semente={cena.id} moldura={cena.moldura ?? true} />}
                 {cena.fundo === 'preto' && <AbsoluteFill style={{ backgroundColor: '#000' }} />}
                 {cena.blocos.map((b, j) => {
                   const C = RENDER[b.tipo];
@@ -101,16 +145,29 @@ export const DocVideo: React.FC<{ plano: Plano }> = ({ plano }) => {
                   );
                 })}
               </EntradaCena>
+              </ProvedorTema>
             </Sequence>
             {cena.audio && (
-              <Sequence from={de} durationInFrames={durAudio} name={`voz ${cena.id}`}>
+              <Sequence
+                from={de + Math.round((cena.audioInicio ?? 0) * fps)}
+                durationInFrames={Math.max(1, durAudio - Math.round((cena.audioInicio ?? 0) * fps))}
+                name={`voz ${cena.id}`}
+              >
                 <Audio src={arquivo(cena.audio)} />
               </Sequence>
             )}
           </React.Fragment>
         );
       })}
-      {plano.trilha && <Audio src={arquivo(plano.trilha.src)} volume={plano.trilha.volume ?? 0.12} loop />}
+      {plano.trilha && !plano.som && <Audio src={arquivo(plano.trilha.src)} volume={plano.trilha.volume ?? 0.12} loop />}
+      {momentosInscreva(plano.cenas.map((c) => c.duracao), plano.inscreva).map((m, k) => (
+        <Sequence key={`inscreva${k}`} from={Math.round(m * fps)} durationInFrames={Math.round(DURACAO_INSCREVA * fps)} name="inscreva-se">
+          <ProvedorTema tema={plano.tema} variacao={0} ritmo={ritmo}>
+            <BotaoInscreva {...(plano.inscreva || {})} />
+          </ProvedorTema>
+        </Sequence>
+      ))}
+      <SomDoPlano plano={plano.som && !plano.som.trilha && plano.trilha ? { ...plano, som: { ...plano.som, trilha: plano.trilha } } : plano} total={duracaoDoPlano(plano)} />
     </AbsoluteFill>
   );
 };

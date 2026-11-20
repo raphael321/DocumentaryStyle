@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   AbsoluteFill,
   Easing,
@@ -6,13 +6,12 @@ import {
   continueRender,
   delayRender,
   interpolate,
-  random,
   spring,
   staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from 'remotion';
-import { COR, GOOGLE_FONTS_URL } from './tema';
+import { GOOGLE_FONTS_URL } from './tema';
 
 // ---------- animação ----------
 
@@ -55,6 +54,16 @@ const carregarFontes = () => {
         document.fonts.load("600 40px 'EB Garamond'"),
         document.fonts.load("700 40px 'Fira Sans'"),
         document.fonts.load("800 40px 'Fira Sans'"),
+        document.fonts.load("600 40px 'Cinzel'"),
+        document.fonts.load("600 40px 'Oswald'"),
+        document.fonts.load("400 40px 'Special Elite'"),
+        document.fonts.load("600 40px 'Barlow Condensed'"),
+        document.fonts.load("200 40px 'IBM Plex Sans'"),
+        document.fonts.load("400 40px 'IBM Plex Sans'"),
+        document.fonts.load("400 40px 'IBM Plex Mono'"),
+        document.fonts.load("600 40px 'IBM Plex Mono'"),
+        document.fonts.load("700 40px Inter"),
+        document.fonts.load("italic 400 40px 'Source Serif 4'"),
       ])
         .then(() => resolve())
         .catch(() => resolve());
@@ -140,42 +149,8 @@ export function useRecurso<T>(chave: string | null, carregar: () => Promise<T>):
 
 // ---------- fundo e textura ----------
 
-/** Fundo azul-noite com estrelas discretas (cenário dos cartões, gráficos e quadro). */
-export const FundoDoc: React.FC<{ semente?: string }> = ({ semente = 'doc' }) => {
-  const frame = useCurrentFrame();
-  const { width, height } = useVideoConfig();
-  const estrelas = useMemo(
-    () =>
-      new Array(140).fill(0).map((_, i) => ({
-        x: random(`${semente}-x-${i}`) * width,
-        y: random(`${semente}-y-${i}`) * height,
-        r: 0.6 + random(`${semente}-r-${i}`) * 1.4,
-        a: 0.15 + random(`${semente}-a-${i}`) * 0.45,
-        f: random(`${semente}-f-${i}`) * 6,
-      })),
-    [semente, width, height],
-  );
-  return (
-    <AbsoluteFill
-      style={{
-        background: `radial-gradient(ellipse at 50% 42%, ${COR.fundoClaro} 0%, ${COR.fundo} 62%, #070b12 100%)`,
-      }}
-    >
-      <svg width={width} height={height} style={{ position: 'absolute' }}>
-        {estrelas.map((e, i) => (
-          <circle
-            key={i}
-            cx={e.x}
-            cy={e.y}
-            r={e.r}
-            fill="#dfe8ff"
-            opacity={e.a * (0.75 + 0.25 * Math.sin(frame / 18 + e.f))}
-          />
-        ))}
-      </svg>
-    </AbsoluteFill>
-  );
-};
+// O fundo das cenas (por tema) fica em Fundos.tsx.
+export { FundoDoc, OrnamentoCartao, OrnamentoTela } from './Fundos';
 
 /** Granulação de filme + vinheta. Coloque por cima de vídeo e foto de arquivo. */
 export const Granulacao: React.FC<{ intensidade?: number; vinheta?: boolean }> = ({

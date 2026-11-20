@@ -11,6 +11,16 @@ cartões de documento, números, linha do tempo e quadro de ligações de fatos.
 | ![mapa real com pinos, rota, seta e cerco](docs/f0420.png) | ![cartão de documento com marca-texto e carimbo](docs/f0600.png) |
 | ![arquivo em tela cheia com legenda de lugar, selo de ano e crédito](docs/f1020.png) | ![quadro de ligações de fatos](docs/f1380.png) |
 
+## Temas automáticos
+O fundo, as cores, as fontes e as molduras mudam com o assunto do roteiro:
+```
+node plugins/documentary-style/skills/documentary-style/scripts/detectar-tema.mjs ROTEIRO.md BRIEFING.md --cenas
+```
+![guerra (sonar), investigação, realeza, ditadura, mar e antiguidade](docs/temas.jpg)
+
+`guerra` (estilo Sonar) · `investigacao` (acidentes, aviação, crimes, mistérios) · `realeza` · `ditadura` · `mar` · `antiguidade`.
+O tema vale para as cenas gráficas; fotos e vídeos reais continuam intercalados em tela cheia.
+
 ## Instalar no Claude Code
 ```
 /plugin marketplace add raphael321/DocumentaryStyle
