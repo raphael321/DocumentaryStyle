@@ -1,0 +1,86 @@
+[
+ {
+  "cena": 1,
+  "texto": "Mais de oito quilômetros de queda em pouco mais de um minuto. Um jato executivo cruzava o céu da Flórida, entrou numa área de tempestades e mergulhou em sobrevelocidade rumo ao chão.",
+  "duracao": 12.31,
+  "estimada": true
+ },
+ {
+  "cena": 2,
+  "texto": "No rádio, a tripulação avisou que o avião estava descendo e, logo depois, declarou emergência: Mayday. Instantes depois, o Learjet sessenta caiu ao lado de um bairro de casas móveis. O que aconteceu por dentro daquele avião?",
+  "duracao": 14.23,
+  "estimada": true
+ },
+ {
+  "cena": 3,
+  "texto": "Domingo, primeiro de novembro de dois mil e vinte e seis. O jato Bombardier Learjet sessenta, matrícula N sete dois dois B D, decola de Austin, no Texas, rumo à ilha de Eleuthera, nas Bahamas. A bordo estão nove pessoas: dois pilotos e sete passageiros. A copilota tinha vinte anos e era filha de brasileiros.",
+  "duracao": 21.15,
+  "estimada": true
+ },
+ {
+  "cena": 4,
+  "texto": "O jato atravessa o Golfo do México e chega à Flórida a trinta e cinco mil pés, mais de dez quilômetros de altura, acima do topo do Monte Everest. Nessa altitude o ar é rarefeito, e a temperatura do lado de fora costuma ficar abaixo de cinquenta graus negativos.",
+  "duracao": 18.85,
+  "estimada": true
+ },
+ {
+  "cena": 5,
+  "texto": "Mas sobre o sul da Flórida há tempestades espalhadas, e o radar mostrava tempo pesado na região pouco antes do acidente. São nuvens de grande desenvolvimento vertical, com correntes de ar violentas e gotículas de água super-resfriada: líquidas abaixo de zero, prontas para congelar no primeiro contato.",
+  "duracao": 18.08,
+  "estimada": true
+ },
+ {
+  "cena": 6,
+  "texto": "Por volta de meio-dia e quarenta e sete, ainda a trinta e cinco mil pés, os pilotos avisam o controle: turbulência moderada e gelo claro leve, que eles consideravam sob controle. O gelo claro é água super-resfriada que congela na hora sobre a asa, transparente como vidro.",
+  "duracao": 18.08,
+  "estimada": true
+ },
+ {
+  "cena": 7,
+  "texto": "A turbulência fazia o jato desviar cerca de duzentos metros da altitude. Depois de relatar precipitação, a tripulação é autorizada a subir para trinta e sete mil pés, seiscentos metros acima, tentando sair do pior da nuvem.",
+  "duracao": 14.23,
+  "estimada": true
+ },
+ {
+  "cena": 8,
+  "texto": "Menos de trinta segundos depois, vem uma nova transmissão: o avião está descendo. Em seguida, o Mayday. Por volta de meio-dia e quarenta e oito, a tripulação relata sobrevelocidade: o jato já passava da velocidade máxima para a qual foi projetado. A queda média passa de vinte mil pés por minuto. É como descer a altura da Torre Eiffel a cada dois ou três segundos.",
+  "duracao": 25.0,
+  "estimada": true
+ },
+ {
+  "cena": 9,
+  "texto": "Segundo a FAA, o jato caiu de cerca de trinta e cinco mil pés para menos de nove mil em pouco mais de um minuto. Por volta de meio-dia e cinquenta, ele atinge o solo junto à avenida Military Trail, em Greenacres, no condado de Palm Beach, ao lado de uma comunidade de casas móveis. Os nove ocupantes morrem. Cerca de seiscentos moradores precisam deixar suas casas.",
+  "duracao": 25.77,
+  "estimada": true
+ },
+ {
+  "cena": 10,
+  "texto": "A NTSB, a agência que investiga acidentes nos Estados Unidos, ainda não apontou a causa, mas diz que o tempo é um dos focos principais. Os fatos conhecidos apontam para três mecanismos que a engenharia aeronáutica conhece bem. O primeiro são as correntes dentro da tempestade. Colunas de ar que sobem e descem com violência jogam o avião para cima e para baixo, e no ar rarefeito a margem entre voar devagar demais e rápido demais é estreita.",
+  "duracao": 30.0,
+  "estimada": true
+ },
+ {
+  "cena": 11,
+  "texto": "O segundo é o gelo, que a própria tripulação relatou. Na asa, mesmo uma camada fina muda o formato do perfil e reduz a sustentação. Nos tubos de Pitot, os sensores que medem a velocidade, o gelo pode bloquear a entrada de ar e dar leituras falsas. Foi o que aconteceu no voo Air France quatrocentos e quarenta e sete, em dois mil e nove: sem velocidade confiável, a tripulação perdeu o controle a trinta e cinco mil pés.",
+  "duracao": 30.38,
+  "estimada": true
+ },
+ {
+  "cena": 12,
+  "texto": "O terceiro é a desorientação espacial. Dentro da nuvem não existe horizonte. O ouvido interno se acostuma a uma curva lenta, e o piloto pode sentir as asas niveladas com o avião inclinado. Se ele puxa o manche para conter a descida sem nivelar as asas, a curva aperta e o avião acelera ainda mais. Os pilotos chamam isso de espiral da morte.",
+  "duracao": 24.23,
+  "estimada": true
+ },
+ {
+  "cena": 13,
+  "texto": "Depois da queda, circulou nas redes o boato de que o jato teria sido abatido por causa da visita de Donald Trump à região. Nada sustenta isso. Trump havia deixado o aeroporto de West Palm Beach pouco mais de uma hora antes, e a NTSB disse não ter encontrado nenhuma ligação entre o acidente e o Serviço Secreto.",
+  "duracao": 22.31,
+  "estimada": true
+ },
+ {
+  "cena": 14,
+  "texto": "Os investigadores viram sinais de que o avião começou a se partir ainda no ar: o profundor esquerdo foi achado em três pedaços, a até seis quilômetros da cratera. O gravador de voz da cabine foi recuperado e está no laboratório da NTSB, em Washington. O relatório preliminar costuma sair em cerca de um mês, e o final leva de um a dois anos. E você, o que acha que pesou mais nessa queda? Deixe nos comentários.",
+  "duracao": 29.62,
+  "estimada": true
+ }
+]

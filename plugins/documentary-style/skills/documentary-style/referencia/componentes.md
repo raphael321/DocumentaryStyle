@@ -94,3 +94,8 @@ ou `false`. Duração `DURACAO_INSCREVA` (6,2 s). Efeitos: clique no curtir e no
 
 ## legenda / credito (soltos)
 `legenda`: `{ local, data?, aos? }`. `credito`: `{ texto }`. Use por cima de qualquer bloco.
+
+## componente: animação própria do vídeo
+Para uma animação que não existe nos blocos prontos (corte de asa, perfil de queda...): escreva o componente no projeto,
+registre uma vez com `registrarComponente('asaGelo', AsaGelo)` e use no plano `{ tipo: 'componente', props: { nome: 'asaGelo', p: { ... } } }`.
+O plano guarda só o nome porque as props do Remotion precisam ser JSON. Exemplo completo em `exemplos/learjet/animacoes.tsx`.

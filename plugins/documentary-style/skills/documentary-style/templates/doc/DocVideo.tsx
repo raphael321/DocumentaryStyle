@@ -28,7 +28,22 @@ export type Bloco = Tempo &
     | { tipo: 'conexoes'; props: P<typeof QuadroConexoes> }
     | { tipo: 'legenda'; props: P<typeof Legenda> }
     | { tipo: 'credito'; props: P<typeof Credito> }
+    | { tipo: 'componente'; props: { nome: string; p?: Record<string, unknown> } }
   );
+
+/**
+ * Animações próprias do vídeo (ex.: corte da asa, perfil de queda). O plano guarda só o NOME (as props do
+ * Remotion precisam ser JSON); o componente é registrado uma vez com registrarComponente('nome', Comp).
+ */
+const COMPONENTES: Record<string, React.FC<any>> = {};
+export const registrarComponente = (nome: string, c: React.FC<any>) => {
+  COMPONENTES[nome] = c;
+};
+const ComponenteRegistrado: React.FC<{ nome: string; p?: Record<string, unknown> }> = ({ nome, p }) => {
+  const C = COMPONENTES[nome];
+  if (!C) throw new Error(`componente "${nome}" não registrado (use registrarComponente)`);
+  return <C {...(p ?? {})} />;
+};
 
 export type CenaPlano = {
   id: string;
@@ -97,6 +112,7 @@ const RENDER: { [K in Bloco['tipo']]: React.FC<any> } = {
   conexoes: QuadroConexoes,
   legenda: Legenda,
   credito: Credito,
+  componente: ComponenteRegistrado,
 };
 
 export const duracaoDoPlano = (plano: Plano) => plano.cenas.reduce((s, c) => s + c.duracao, 0);

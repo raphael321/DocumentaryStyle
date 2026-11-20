@@ -9,7 +9,7 @@ export { MapaReal } from './MapaReal';
 export { GloboReal } from './GloboReal';
 export { ComparacaoBarras, NumeroGrande, LinhaDoTempo } from './Graficos';
 export { QuadroConexoes } from './QuadroConexoes';
-export { DocVideo, duracaoDoPlano } from './DocVideo';
+export { DocVideo, duracaoDoPlano, registrarComponente } from './DocVideo';
 export type { Plano, CenaPlano, Bloco, Som } from './DocVideo';
 export { eventosDeSom, conferirPlano } from './Som';
 export type { LonLat, QuadroCamera, QuadroGlobo } from './geo';
