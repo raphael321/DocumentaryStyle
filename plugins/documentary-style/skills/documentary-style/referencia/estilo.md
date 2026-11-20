@@ -32,8 +32,10 @@ Cor tem significado: escolha **uma cor por lado** do conflito e mantenha no víd
 4. **Mapa real**: satélite da NASA levemente escurecido. Países em cor sólida translúcida com borda branca. Setas
    grossas com ponta para avanços. Linhas tracejadas para rotas, com ícone (navio, avião, tanque, submarino) na ponta.
    Pinos com pulso. Medalhões (foto redonda com anel colorido) para pessoas. Nomes de lugar em versalete com data.
-5. **Cena 3D (motion graphics)**: a moldura preferida para tudo que é animação. Fundo azul-noite com neblina,
-   mar escuro com grade sutil, país em relevo cor de papel com borda dourada, vizinhos em cinza-azulado baixo.
+5. **Cena 3D sobre o mapa real (motion graphics)**: a moldura preferida para tudo que é animação. O chão é o
+   satélite real (NASA + recorte Sentinel-2) sobre o relevo real, levemente escurecido, com as bordas se
+   dissolvendo no azul-noite e neblina ao fundo. A fronteira do país se desenha em dourado.
+   Sem satélite da região: país em relevo cor de papel com borda dourada, vizinhos em cinza-azulado baixo.
    Pinos vermelhos com anel pulsando, arcos de rota vermelhos com ponta, áreas azuis translúcidas, colunas
    douradas. Fotos reais entram como placas de papel no espaço. A câmera está sempre andando.
 6. **Globo 3D**: para abrir o vídeo e para trocar de continente. Gira até o lugar, aproxima e corta para o mapa.

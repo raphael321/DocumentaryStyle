@@ -1,5 +1,6 @@
 // DocumentaryStyle: cena 3D com motion graphics (Remotion + @remotion/three + three.js).
-// Mapa em relevo com países que sobem, áreas (enchente, zona ocupada), colunas, pinos, arcos de rota,
+// PRIORIDADE: mapa REAL (`terreno`: satélite NASA/Sentinel-2 sobre o relevo real) com as animações 3D por cima.
+// Sem terreno, vira o mapa estilizado: países em relevo que sobem, áreas (enchente, zona ocupada), colunas, pinos, arcos de rota,
 // fotos reais em placas no espaço e modelos .glb. Câmera 3D que orbita e mergulha.
 // Dependências extras (uma vez por projeto): npm i @remotion/three@<mesma versão do remotion> three @react-three/fiber @types/three
 import React, { useLayoutEffect, useMemo } from 'react';
@@ -8,6 +9,10 @@ import { ThreeCanvas } from '@remotion/three';
 import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { Line2 } from 'three/examples/jsm/lines/Line2.js';
+import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
+import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
+import { type Altitudes, type Terreno3D, carregarTerreno, chaoKm, geometriaTerreno, texturaTerreno } from './Terreno3D';
 import { COR, FONTE, SOMBRA_TEXTO } from './tema';
 import { Granulacao, arquivo, carregarImagem, carregarJson, mola, surgir, useRecurso } from './base';
 import { ARQUIVO_PAISES, type LonLat } from './geo';
@@ -18,7 +23,15 @@ import { ARQUIVO_PAISES, type LonLat } from './geo';
 export type QuadroCamera3D = { t: number; lon: number; lat: number; distancia: number; inclinacao?: number; giro?: number };
 
 type Entrada = { aos?: number };
-export type Pais3D = Entrada & { iso: string; cor?: string; altura?: number; borda?: string; lateral?: string };
+export type Pais3D = Entrada & {
+  iso: string; cor?: string; altura?: number; borda?: string; lateral?: string;
+  /** 'borda' = fronteira luminosa sobre o mapa real (padrão com terreno); 'relevo' = país de papel que sobe (padrão sem terreno) */
+  modo?: 'borda' | 'relevo';
+  /** no modo borda: tinta translúcida sobre o país (0 = sem, padrão 0) */
+  preenchimento?: number;
+  /** no modo borda: espessura da linha em px a 1080p (padrão 5) e tempo de desenho (padrão 1.6 s) */
+  espessura?: number; dur?: number;
+};
 export type Area3D = Entrada & { pontos: LonLat[]; cor?: string; altura?: number; opacidade?: number; dur?: number; base?: number };
 export type Coluna3D = Entrada & { lon: number; lat: number; valor: number; rotulo?: string; sub?: string; cor?: string; raio?: number };
 export type Pino3D = Entrada & { lon: number; lat: number; rotulo?: string; sub?: string; cor?: string; altura?: number };
@@ -34,6 +47,10 @@ export type Chao3D = { src: string; oeste: number; sul: number; leste: number; n
 export type Cena3DProps = {
   /** ponto (lon, lat) que vira a origem do mundo 3D; normalmente o centro da região */
   centro: LonLat;
+  /** MAPA REAL em 3D (prioridade): satélite real sobre o relevo real. Veja Terreno3D.ts */
+  terreno?: Terreno3D;
+  /** fronteiras: '10m' (finas, casam com o satélite; padrão com terreno) ou '50m' (padrão sem terreno) */
+  fronteiras?: '10m' | '50m';
   camera: QuadroCamera3D[];
   paises?: Pais3D[];
   areas?: Area3D[];
@@ -154,7 +171,7 @@ const Extrudado: React.FC<{
   );
 };
 
-const Arco: React.FC<{ r: Rota3D; centro: LonLat; seg: number }> = ({ r, centro, seg }) => {
+const Arco: React.FC<{ r: Rota3D; centro: LonLat; seg: number; chaoEm: (lon: number, lat: number) => number }> = ({ r, centro, seg, chaoEm }) => {
   const largura = r.largura ?? 1.6;
   const { curva, geom, total } = useMemo(() => {
     const pts = r.pontos.map((ll) => paraCena(centro, ll));
@@ -163,10 +180,10 @@ const Arco: React.FC<{ r: Rota3D; centro: LonLat; seg: number }> = ({ r, centro,
     const arco = r.arco ?? comp * 0.22;
     const amostras: THREE.Vector3[] = [];
     const n = 60;
-    const linha = new THREE.CatmullRomCurve3(pts.map(([x, z]) => new THREE.Vector3(x, 0, z)));
+    const linha = new THREE.CatmullRomCurve3(pts.map(([x, z], i) => new THREE.Vector3(x, chaoEm(r.pontos[i][0], r.pontos[i][1]), z)));
     for (let i = 0; i <= n; i++) {
       const p = linha.getPoint(i / n);
-      p.y = 1.5 + Math.sin((Math.PI * i) / n) * arco;
+      p.y += 1.5 + Math.sin((Math.PI * i) / n) * arco;
       amostras.push(p);
     }
     const c = new THREE.CatmullRomCurve3(amostras);
@@ -198,7 +215,7 @@ const Arco: React.FC<{ r: Rota3D; centro: LonLat; seg: number }> = ({ r, centro,
   );
 };
 
-const PlacaFoto: React.FC<{ f: Foto3D; img: HTMLImageElement; centro: LonLat; frame: number; fps: number; camPos: THREE.Vector3 }> = ({ f, img, centro, frame, fps, camPos }) => {
+const PlacaFoto: React.FC<{ f: Foto3D; img: HTMLImageElement; centro: LonLat; frame: number; fps: number; camPos: THREE.Vector3; chao: number }> = ({ f, img, centro, frame, fps, camPos, chao }) => {
   const tex = useMemo(() => {
     const t = new THREE.Texture(img);
     t.colorSpace = THREE.SRGBColorSpace;
@@ -210,7 +227,7 @@ const PlacaFoto: React.FC<{ f: Foto3D; img: HTMLImageElement; centro: LonLat; fr
   const alt = f.altura ?? (largura * img.naturalHeight) / img.naturalWidth;
   const [x, z] = paraCena(centro, [f.lon, f.lat]);
   const s = subida(frame, fps, f.aos ?? 0);
-  const yBase = (f.elevacao ?? 8) + alt / 2;
+  const yBase = chao + (f.elevacao ?? 8) + alt / 2;
   const giro = f.giro !== undefined ? (f.giro * Math.PI) / 180 : Math.atan2(camPos.x - x, camPos.z - z);
   const borda = largura * 0.035;
   return (
@@ -227,13 +244,47 @@ const PlacaFoto: React.FC<{ f: Foto3D; img: HTMLImageElement; centro: LonLat; fr
   );
 };
 
-const ModeloGlb: React.FC<{ m: Modelo3D; cena: THREE.Object3D; centro: LonLat; frame: number; fps: number }> = ({ m, cena, centro, frame, fps }) => {
+const ModeloGlb: React.FC<{ m: Modelo3D; cena: THREE.Object3D; centro: LonLat; frame: number; fps: number; chao: number }> = ({ m, cena, centro, frame, fps, chao }) => {
   const obj = useMemo(() => cena.clone(true), [cena]);
   useMemo(() => obj.traverse((o) => ((o as THREE.Mesh).isMesh ? ((o.castShadow = true), (o.receiveShadow = true)) : null)), [obj]);
   const [x, z] = paraCena(centro, [m.lon, m.lat]);
   const s = subida(frame, fps, m.aos ?? 0) * (m.escala ?? 1);
   const giro = (((m.giro ?? 0) + (m.girarPorSeg ?? 0) * (frame / fps)) * Math.PI) / 180;
-  return <primitive object={obj} position={[x, m.elevacao ?? 0, z]} rotation={[0, giro, 0]} scale={[s, s, s]} />;
+  return <primitive object={obj} position={[x, chao + (m.elevacao ?? 0), z]} rotation={[0, giro, 0]} scale={[s, s, s]} />;
+};
+
+const BordaPais: React.FC<{ aneis: LonLat[][]; centro: LonLat; terreno?: Terreno3D; alt: Altitudes; cor: string; espessura: number; p: number; largura: number; altura: number }> = ({
+  aneis, centro, terreno, alt, cor, espessura, p, largura, altura,
+}) => {
+  const linhas = useMemo(
+    () =>
+      aneis
+        .filter((a) => a.length > 8)
+        .map((anel) => {
+          const g = new LineGeometry();
+          const pts: number[] = [];
+          for (const [lon, lat] of anel) {
+            const [x, z] = paraCena(centro, [lon, lat]);
+            pts.push(x, chaoKm(terreno, alt, lon, lat) + 0.35, z);
+          }
+          g.setPositions(pts);
+          const m = new LineMaterial({ color: new THREE.Color(cor).getHex(), linewidth: espessura * (altura / 1080), transparent: true, depthTest: true });
+          m.resolution.set(largura, altura);
+          const l = new Line2(g, m);
+          l.computeLineDistances();
+          return { l, n: anel.length - 1 };
+        }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [aneis, centro[0], centro[1], terreno, alt, cor, espessura, largura, altura],
+  );
+  return (
+    <group>
+      {linhas.map(({ l, n }, i) => {
+        (l.geometry as LineGeometry).instanceCount = Math.max(0, Math.floor(n * p));
+        return <primitive key={i} object={l} />;
+      })}
+    </group>
+  );
 };
 
 // ---------- componente ----------
@@ -242,23 +293,37 @@ type Rotulo = { id: string; pos: THREE.Vector3; texto?: string; sub?: string; co
 
 export const Cena3D: React.FC<Cena3DProps> = (props) => {
   const {
-    centro, camera, paises = [], areas = [], colunas = [], pinos = [], rotas = [], fotos = [], modelos = [], chao,
-    alturaColunas = 70, titulo, neblina = true, graos = 0.05, grade = true, fov = 34,
+    centro, camera, terreno, fronteiras = terreno ? '10m' : '50m', paises = [], areas = [], colunas = [], pinos = [], rotas = [], fotos = [], modelos = [], chao,
+    alturaColunas = 70, titulo, neblina = true, graos = 0.05, grade = !terreno, fov = 34,
   } = props;
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const seg = frame / fps;
 
-  const chave = JSON.stringify([paises.map((p) => p.iso), fotos.map((f) => f.src), modelos.map((m) => m.src), chao?.src]);
+  const chave = JSON.stringify([paises.map((p) => p.iso), fotos.map((f) => f.src), modelos.map((m) => m.src), chao?.src, terreno]);
   const rec = useRecurso(chave, async () => {
-    const geo = paises.length ? await carregarJson<{ features: Feicao[] }>(ARQUIVO_PAISES) : { features: [] };
+    const geo = paises.length ? await carregarJson<{ features: Feicao[] }>(fronteiras === '10m' ? 'doc/mapa/paises-10m.geojson' : ARQUIVO_PAISES) : { features: [] };
     const imgs = await Promise.all(fotos.map((f) => carregarImagem(f.src)));
     const loader = new GLTFLoader();
     const glbs = await Promise.all(modelos.map((m) => loader.loadAsync(arquivo(m.src)).then((g) => g.scene)));
     const imgChao = chao ? await carregarImagem(chao.src) : null;
-    return { geo, imgs, glbs, imgChao };
+    const terr = terreno ? await carregarTerreno(terreno) : null;
+    return { geo, imgs, glbs, imgChao, terr };
   });
 
+  const alt: Altitudes = rec?.terr?.alt ?? null;
+  /** altura do chão (km) num lon/lat: relevo real quando há terreno, 0 sem ele */
+  const chaoEm = (lon: number, lat: number) => chaoKm(terreno, alt, lon, lat);
+  const malhaTerreno = useMemo(
+    () => (rec?.terr && terreno ? { g: geometriaTerreno(terreno, rec.terr.alt, centro), t: texturaTerreno(terreno, rec.terr.imgs) } : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [rec, centro[0], centro[1]],
+  );
+  const aneisPaises = useMemo(
+    () => (rec ? paises.map((p) => poligonosDoPais(rec.geo, p.iso).flat()) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [rec, JSON.stringify(paises.map((p) => p.iso))],
+  );
   const formasPaises = useMemo(
     () => (rec ? paises.map((p) => poligonosDoPais(rec.geo, p.iso).map((pol) => formaDeAneis(centro, pol))) : []),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -296,19 +361,20 @@ export const Cena3D: React.FC<Cena3DProps> = (props) => {
   pinos.forEach((p, i) => {
     const [x, z] = paraCena(centro, [p.lon, p.lat]);
     const h = p.altura ?? 22;
-    if (p.rotulo) rotulos.push({ id: `p${i}`, pos: new THREE.Vector3(x, h + 6, z), texto: p.rotulo, sub: p.sub, cor: p.cor ?? COR.vermelho, op: surgir(frame, fps, (p.aos ?? 0) + 0.35, 0.4) });
+    if (p.rotulo) rotulos.push({ id: `p${i}`, pos: new THREE.Vector3(x, chaoEm(p.lon, p.lat) + h + 6, z), texto: p.rotulo, sub: p.sub, cor: p.cor ?? COR.vermelho, op: surgir(frame, fps, (p.aos ?? 0) + 0.35, 0.4) });
   });
   colunas.forEach((c, i) => {
     const [x, z] = paraCena(centro, [c.lon, c.lat]);
     const s = subida(frame, fps, c.aos ?? 0);
-    if (c.rotulo) rotulos.push({ id: `c${i}`, pos: new THREE.Vector3(x, c.valor * alturaColunas * s + 6, z), texto: c.rotulo, sub: c.sub, cor: c.cor ?? COR.ouro, op: surgir(frame, fps, (c.aos ?? 0) + 0.5, 0.4), grande: true });
+    if (c.rotulo) rotulos.push({ id: `c${i}`, pos: new THREE.Vector3(x, chaoEm(c.lon, c.lat) + c.valor * alturaColunas * s + 6, z), texto: c.rotulo, sub: c.sub, cor: c.cor ?? COR.ouro, op: surgir(frame, fps, (c.aos ?? 0) + 0.5, 0.4), grande: true });
   });
   fotos.forEach((f, i) => {
     if (!f.legenda) return;
     const [x, z] = paraCena(centro, [f.lon, f.lat]);
-    rotulos.push({ id: `f${i}`, pos: new THREE.Vector3(x, (f.elevacao ?? 8) - 2, z), texto: f.legenda, cor: COR.ouro, op: surgir(frame, fps, (f.aos ?? 0) + 0.6, 0.4) });
+    rotulos.push({ id: `f${i}`, pos: new THREE.Vector3(x, chaoEm(f.lon, f.lat) + (f.elevacao ?? 8) - 2, z), texto: f.legenda, cor: COR.ouro, op: surgir(frame, fps, (f.aos ?? 0) + 0.6, 0.4) });
   });
   const creditos = fotos.filter((f, i) => f.credito && seg >= (fotos[i].aos ?? 0)).map((f) => f.credito!);
+  if (terreno) creditos.unshift(terreno.credito ?? 'Satélite: NASA Blue Marble · Sentinel-2 cloudless (EOX, CC BY 4.0) · Relevo: AWS Terrain Tiles');
 
   const dNeblina = cam.distancia;
 
@@ -339,7 +405,7 @@ export const Cena3D: React.FC<Cena3DProps> = (props) => {
         {/* mar / chão */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.2, 0]} receiveShadow>
           <planeGeometry args={[20000, 20000]} />
-          <meshStandardMaterial color="#132a44" roughness={0.95} />
+          <meshStandardMaterial color={terreno ? "#0c1420" : "#132a44"} roughness={0.95} />
         </mesh>
         {grade && <gridHelper args={[4000, 160, '#2b4566', '#1d3452']} position={[0, 0, 0]} />}
         {chao && texChao && (() => {
@@ -353,10 +419,29 @@ export const Cena3D: React.FC<Cena3DProps> = (props) => {
           );
         })()}
 
-        {paises.map((p, i) => (
-          <Extrudado key={`pais${i}`} formas={formasPaises[i] ?? []} altura={p.altura ?? 4} cor={p.cor ?? COR.papel} lateral={p.lateral}
-            borda={p.borda ?? COR.ouro} escalaY={subida(frame, fps, p.aos ?? 0)} />
-        ))}
+        {malhaTerreno && (
+          <mesh geometry={malhaTerreno.g} receiveShadow castShadow>
+            <meshStandardMaterial map={malhaTerreno.t} roughness={1} metalness={0} />
+          </mesh>
+        )}
+        {paises.map((p, i) => {
+          if ((p.modo ?? (terreno ? 'borda' : 'relevo')) === 'relevo')
+            return (
+              <Extrudado key={`pais${i}`} formas={formasPaises[i] ?? []} altura={p.altura ?? 4} cor={p.cor ?? COR.papel} lateral={p.lateral}
+                borda={p.borda ?? COR.ouro} escalaY={subida(frame, fps, p.aos ?? 0)} />
+            );
+          const prog = interpolate(seg, [p.aos ?? 0, (p.aos ?? 0) + (p.dur ?? 1.6)], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.inOut(Easing.cubic) });
+          const tinta = (p.preenchimento ?? 0) * surgir(frame, fps, (p.aos ?? 0) + (p.dur ?? 1.6) * 0.6, 0.6);
+          return (
+            <group key={`pais${i}`}>
+              <BordaPais aneis={aneisPaises[i] ?? []} centro={centro} terreno={terreno} alt={alt} cor={p.borda ?? COR.ouro}
+                espessura={p.espessura ?? 5} p={prog} largura={width} altura={height} />
+              {tinta > 0 && (
+                <Extrudado formas={formasPaises[i] ?? []} altura={0.2} cor={p.cor ?? COR.ouro} opacidade={tinta} escalaY={1} base={0.25} sombra={false} />
+              )}
+            </group>
+          );
+        })}
         {areas.map((a, i) => {
           if (seg < (a.aos ?? 0)) return null;
           const pr = interpolate(seg, [a.aos ?? 0, (a.aos ?? 0) + (a.dur ?? 1.4)], [0.0001, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
@@ -370,7 +455,7 @@ export const Cena3D: React.FC<Cena3DProps> = (props) => {
           const h = Math.max(0.01, c.valor * alturaColunas * subida(frame, fps, c.aos ?? 0));
           const r = c.raio ?? 7;
           return (
-            <mesh key={`col${i}`} position={[x, h / 2, z]} castShadow>
+            <mesh key={`col${i}`} position={[x, chaoEm(c.lon, c.lat) + h / 2, z]} castShadow>
               <cylinderGeometry args={[r, r, h, 40]} />
               <meshStandardMaterial color={c.cor ?? COR.ouro} roughness={0.45} metalness={0.25} />
             </mesh>
@@ -383,7 +468,7 @@ export const Cena3D: React.FC<Cena3DProps> = (props) => {
           const cor = p.cor ?? COR.vermelho;
           const pulso = ((seg - (p.aos ?? 0)) % 1.6) / 1.6;
           return (
-            <group key={`pin${i}`} position={[x, (1 - s) * 60, z]} visible={seg >= (p.aos ?? 0)}>
+            <group key={`pin${i}`} position={[x, chaoEm(p.lon, p.lat) + (1 - s) * 60, z]} visible={seg >= (p.aos ?? 0)}>
               <mesh position={[0, h / 2, 0]} castShadow>
                 <cylinderGeometry args={[0.7, 0.7, h, 12]} />
                 <meshStandardMaterial color="#f6f2e9" />
@@ -401,9 +486,9 @@ export const Cena3D: React.FC<Cena3DProps> = (props) => {
             </group>
           );
         })}
-        {rotas.map((r, i) => <Arco key={`rota${i}`} r={r} centro={centro} seg={seg} />)}
-        {fotos.map((f, i) => seg >= (f.aos ?? 0) && <PlacaFoto key={`foto${i}`} f={f} img={rec.imgs[i]} centro={centro} frame={frame} fps={fps} camPos={cam.pos} />)}
-        {modelos.map((m, i) => seg >= (m.aos ?? 0) && <ModeloGlb key={`mod${i}`} m={m} cena={rec.glbs[i]} centro={centro} frame={frame} fps={fps} />)}
+        {rotas.map((r, i) => <Arco key={`rota${i}`} r={r} centro={centro} seg={seg} chaoEm={chaoEm} />)}
+        {fotos.map((f, i) => seg >= (f.aos ?? 0) && <PlacaFoto key={`foto${i}`} f={f} img={rec.imgs[i]} centro={centro} frame={frame} fps={fps} camPos={cam.pos} chao={chaoEm(f.lon, f.lat)} />)}
+        {modelos.map((m, i) => seg >= (m.aos ?? 0) && <ModeloGlb key={`mod${i}`} m={m} cena={rec.glbs[i]} centro={centro} frame={frame} fps={fps} chao={chaoEm(m.lon, m.lat)} />)}
       </ThreeCanvas>
 
       {/* rótulos e títulos em HTML (fontes do estilo, nítidos em qualquer resolução) */}

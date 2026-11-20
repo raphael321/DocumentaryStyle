@@ -51,8 +51,16 @@ Requer `@remotion/three` (mesma versão do `remotion`), `three`, `@react-three/f
 Unidades: **km** a partir de `centro`. Tempos `aos`/`dur`/`t` em segundos desde o início do bloco.
 ```ts
 centro: [lon, lat]
+terreno?: {                       // MAPA REAL (prioridade): satélite real sobre relevo real
+  oeste, sul, leste, norte,       // caixa do terreno (maior que o que a câmera vê)
+  satelite: { src, oeste, sul, leste, norte, suavizar? (0.04) }[],   // 1ª = base NASA; seguintes = recortes Sentinel-2 por cima
+  relevo?: 'doc/relevo/<nome>',   // de baixar-relevo.mjs; sem ele o chão fica plano
+  exagero? (12), segmentos? (320), resolucao? (4096), escurecer? (0.12), bordaSuave? (0.08), credito?
+}
+fronteiras?: '10m' | '50m'        // padrão '10m' com terreno
 camera: { t, lon, lat, distancia /*km*/, inclinacao? /*0 = de cima, 75 = rasante; 45*/, giro? /*graus, 0 = olhando o norte*/ }[]
-paises?:  { iso, cor? (papel), altura? (4), borda? (ouro), lateral?, aos? }[]           // país em relevo que sobe com mola
+paises?:  { iso, modo? ('borda' com terreno | 'relevo' sem), borda? (ouro), espessura? (5 px), dur? (1.6), preenchimento? (0),
+            cor?, altura? (4), lateral?, aos? }[]      // borda = fronteira se desenhando no mapa real; relevo = país de papel que sobe
 areas?:   { pontos: [lon,lat][], cor? (azul), altura? (6), base? (0.1), opacidade? (0.78), aos?, dur? (1.4) }[]  // enchente, zona
 colunas?: { lon, lat, valor /*0..1*/, rotulo?, sub?, cor? (ouro), raio? (7), aos? }[]   // altura = valor * alturaColunas
 alturaColunas?: 70
@@ -64,6 +72,7 @@ chao?:    { src, oeste, sul, leste, norte, escurecer? }   // satélite ou mapa a
 titulo?:  { texto, sub?, aos?, ate? }
 neblina? (true), grade? (true), graos? (0.05), fov? (34)
 ```
+Com `terreno`, pinos, colunas, rotas, fotos e modelos ficam apoiados na altitude real do ponto.
 Rótulos (pinos, colunas, legendas de foto) são HTML projetado na tela, com as fontes do estilo em tamanho grande
 (44–54 px a 1080p). Créditos das fotos aparecem juntos no canto inferior direito.
 

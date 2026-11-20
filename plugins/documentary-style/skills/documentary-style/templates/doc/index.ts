@@ -9,6 +9,7 @@ export { ComparacaoBarras, NumeroGrande, LinhaDoTempo } from './Graficos';
 export { QuadroConexoes } from './QuadroConexoes';
 export { Cena3D, camera3DNoTempo } from './Cena3D';
 export type { Cena3DProps, QuadroCamera3D } from './Cena3D';
+export type { Terreno3D, CamadaSatelite } from './Terreno3D';
 export { DocVideo, duracaoDoPlano } from './DocVideo';
 export type { Plano, CenaPlano, Bloco } from './DocVideo';
 export type { LonLat, QuadroCamera, QuadroGlobo } from './geo';
