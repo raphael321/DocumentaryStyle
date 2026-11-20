@@ -1,15 +1,15 @@
 {
   "name": "documentary-style",
   "description": "DocumentaryStyle: documentários de arquivo em Remotion, com vídeo real em tela cheia, mapa de satélite real animado, cartões de documento, ligações de fatos e gráficos.",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "owner": { "name": "raphael321", "url": "https://github.com/raphael321" },
   "plugins": [
     {
       "name": "documentary-style",
       "source": "./plugins/documentary-style",
-      "description": "Skill e componentes Remotion para vídeos no estilo documentário de arquivo: globo 3D e mapa de satélite real com rotas, setas, pinos e medalhões; vídeo/foto de arquivo em tela cheia com legenda de lugar e crédito; cartão de documento com marca-texto e carimbo; número grande, barras, linha do tempo e quadro de ligações.",
+      "description": "Skill e componentes Remotion para vídeos no estilo documentário de arquivo: cenas 3D com motion graphics (prioridade nas animações), globo 3D e mapa de satélite real com rotas, setas, pinos e medalhões; vídeo/foto de arquivo em tela cheia com legenda de lugar e crédito; cartão de documento com marca-texto e carimbo; número grande, barras, linha do tempo e quadro de ligações.",
       "category": "content",
-      "keywords": ["remotion", "documentario", "documentary", "mapa", "map", "youtube", "video", "historia"],
+      "keywords": ["remotion", "3d", "threejs", "documentario", "documentary", "mapa", "map", "youtube", "video", "historia"],
       "homepage": "https://github.com/raphael321/DocumentaryStyle",
       "repository": "https://github.com/raphael321/DocumentaryStyle"
     }

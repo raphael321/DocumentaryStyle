@@ -32,10 +32,14 @@ Cor tem significado: escolha **uma cor por lado** do conflito e mantenha no víd
 4. **Mapa real**: satélite da NASA levemente escurecido. Países em cor sólida translúcida com borda branca. Setas
    grossas com ponta para avanços. Linhas tracejadas para rotas, com ícone (navio, avião, tanque, submarino) na ponta.
    Pinos com pulso. Medalhões (foto redonda com anel colorido) para pessoas. Nomes de lugar em versalete com data.
-5. **Globo 3D**: para abrir o vídeo e para trocar de continente. Gira até o lugar, aproxima e corta para o mapa.
-6. **Número grande / barras**: sobre o azul-noite, com fio dourado e a fonte do dado embaixo.
-7. **Linha do tempo**: ano grande no topo e régua deslizando. O modo `selo` (ano + lugar) vai por cima de vídeo.
-8. **Quadro de ligações**: cartões de papel com alfinete, ligados por linhas com rótulo ("ordenou", "financiou",
+5. **Cena 3D (motion graphics)**: a moldura preferida para tudo que é animação. Fundo azul-noite com neblina,
+   mar escuro com grade sutil, país em relevo cor de papel com borda dourada, vizinhos em cinza-azulado baixo.
+   Pinos vermelhos com anel pulsando, arcos de rota vermelhos com ponta, áreas azuis translúcidas, colunas
+   douradas. Fotos reais entram como placas de papel no espaço. A câmera está sempre andando.
+6. **Globo 3D**: para abrir o vídeo e para trocar de continente. Gira até o lugar, aproxima e corta para o mapa.
+7. **Número grande / barras**: sobre o azul-noite, com fio dourado e a fonte do dado embaixo.
+8. **Linha do tempo**: ano grande no topo e régua deslizando. O modo `selo` (ano + lugar) vai por cima de vídeo.
+9. **Quadro de ligações**: cartões de papel com alfinete, ligados por linhas com rótulo ("ordenou", "financiou",
    "3 dias depois"). A câmera aproxima do cartão central no fim.
 
 ## Ritmo

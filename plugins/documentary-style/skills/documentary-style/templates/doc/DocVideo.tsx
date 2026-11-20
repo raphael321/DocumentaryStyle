@@ -7,6 +7,7 @@ import { MapaReal } from './MapaReal';
 import { GloboReal } from './GloboReal';
 import { ComparacaoBarras, LinhaDoTempo, NumeroGrande } from './Graficos';
 import { QuadroConexoes } from './QuadroConexoes';
+import { Cena3D } from './Cena3D';
 
 type P<C extends React.FC<any>> = React.ComponentProps<C>;
 type Tempo = { inicio?: number; duracao?: number };
@@ -23,6 +24,7 @@ export type Bloco = Tempo &
     | { tipo: 'numero'; props: P<typeof NumeroGrande> }
     | { tipo: 'linhaTempo'; props: P<typeof LinhaDoTempo> }
     | { tipo: 'conexoes'; props: P<typeof QuadroConexoes> }
+    | { tipo: 'cena3d'; props: P<typeof Cena3D> }
     | { tipo: 'legenda'; props: P<typeof Legenda> }
     | { tipo: 'credito'; props: P<typeof Credito> }
   );
@@ -55,6 +57,7 @@ const RENDER: { [K in Bloco['tipo']]: React.FC<any> } = {
   numero: NumeroGrande,
   linhaTempo: LinhaDoTempo,
   conexoes: QuadroConexoes,
+  cena3d: Cena3D,
   legenda: Legenda,
   credito: Credito,
 };

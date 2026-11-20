@@ -11,6 +11,8 @@ cartões de documento, números, linha do tempo e quadro de ligações de fatos.
 | ![mapa real com pinos, rota, seta e cerco](docs/f0420.png) | ![cartão de documento com marca-texto e carimbo](docs/f0600.png) |
 | ![arquivo em tela cheia com legenda de lugar, selo de ano e crédito](docs/f1020.png) | ![quadro de ligações de fatos](docs/f1380.png) |
 
+![cena 3D: país em relevo, pinos, rota, área de enchente e foto de arquivo no espaço](docs/f3d.png)
+
 ## Instalar no Claude Code
 ```
 /plugin marketplace add raphael321/DocumentaryStyle
@@ -28,6 +30,7 @@ Depois peça, por exemplo: *"use o DocumentaryStyle para montar o vídeo do rote
 |---|---|
 | `arquivo` | vídeo/foto real em tela cheia (ou 4:3 com fundo desfocado), Ken Burns, granulação, legenda LOCAL + data, crédito |
 | `mapa` | satélite NASA + países/rios Natural Earth; câmera com zoom; países pintados, rotas com ícone, setas, pinos, medalhões de pessoas, cercos, áreas |
+| `cena3d` | **3D com motion graphics (prioridade em toda animação)**: país em relevo, áreas que sobem, colunas, pinos, arcos de rota, fotos reais em placas no espaço, modelos .glb, câmera que orbita e mergulha (three.js via `@remotion/three`) |
 | `globo` | globo 3D girando e aproximando, com países, pinos e arcos |
 | `documento` | cartão de papel com citação, marca-texto `[[...]]` e carimbo vermelho |
 | `foto` | foto em moldura de papel com legenda |

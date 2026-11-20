@@ -19,6 +19,8 @@ if (!fs.existsSync(pkgPath)) {
 const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
 const deps = { ...pkg.dependencies, ...pkg.devDependencies };
 if (!deps.remotion) console.warn('Aviso: "remotion" não está no package.json deste projeto.');
+const faltam3D = ['@remotion/three', 'three', '@react-three/fiber'].filter((d) => !deps[d]);
+const versaoRemotion = String(deps.remotion ?? '').replace(/^[^0-9]*/, '');
 
 const copiados = [], pulados = [];
 const copiar = (de, para) => {
@@ -42,7 +44,7 @@ const temMapa = fs.existsSync(path.join(projeto, 'public', 'doc', 'mapa', 'terra
 console.log(`
 Próximos passos:
 ${temMapa ? '  - mapas: já existem em public/doc/mapa' : '  - mapas: node ' + path.join(aqui, 'baixar-mapas.mjs') + ' ' + path.join(projeto, 'public', 'doc', 'mapa') + ' --hd'}
-  - registre no Root.tsx:
+${faltam3D.length ? `  - cenas 3D (bloco cena3d, prioridade nas animações): npm i @remotion/three@${versaoRemotion || '<versão do remotion>'} three @react-three/fiber @types/three\n    render com --gl=angle (Windows/Mac) ou --gl=swangle (Linux sem GPU)\n` : '  - cenas 3D: dependências já instaladas\n'}  - registre no Root.tsx:
       import { DocVideo, duracaoDoPlano } from './doc';
       import { PLANO_DEMO } from './doc/demo';
       <Composition id="DocDemo" component={DocVideo} fps={30} width={1920} height={1080}
