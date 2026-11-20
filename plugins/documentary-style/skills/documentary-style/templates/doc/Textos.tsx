@@ -11,6 +11,17 @@ export const Legenda: React.FC<{ local: string; data?: string; aos?: number }> =
   const texto = surgir(frame, fps, aos + 0.15, 0.45);
   return (
     <AbsoluteFill style={{ pointerEvents: 'none' }}>
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: 260,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.28) 55%, rgba(0,0,0,0) 100%)',
+          opacity: texto,
+        }}
+      />
       <div style={{ position: 'absolute', left: 84, bottom: 104, display: 'flex', alignItems: 'stretch', gap: 18 }}>
         <div style={{ width: 6, background: COR.ouro, transform: `scaleY(${barra})`, transformOrigin: 'bottom' }} />
         <div style={{ opacity: texto, transform: `translateX(${(1 - texto) * -24}px)` }}>
@@ -143,7 +154,7 @@ export const CartaoDocumento: React.FC<{
           background: `linear-gradient(180deg, #f7f1e3 0%, ${COR.papel} 100%)`,
           border: `1px solid ${COR.papelBorda}`,
           boxShadow: '0 30px 60px rgba(0,0,0,0.55), inset 0 0 40px rgba(160,130,70,0.18)',
-          padding: '34px 54px 26px',
+          padding: carimbo ? '34px 54px 86px' : '34px 54px 26px',
           opacity: entrada,
           transform: `translateY(${(1 - entrada) * 30}px) scale(${0.96 + entrada * 0.04})`,
         }}
@@ -191,21 +202,22 @@ export const CartaoDocumento: React.FC<{
           <div
             style={{
               position: 'absolute',
-              left: '50%',
-              top: '58%',
-              transform: `translate(-42%, -50%) rotate(-7deg) scale(${2.2 - batida * 1.2})`,
+              right: 48,
+              bottom: 34,
+              transform: `rotate(-8deg) scale(${2.1 - batida * 1.1})`,
+              transformOrigin: 'center',
               opacity: Math.min(1, batida * 1.4),
               border: `5px solid ${corCarimbo}`,
               borderRadius: 8,
-              padding: '6px 22px',
+              padding: '5px 20px',
               color: corCarimbo,
               fontFamily: FONTE.sans,
               fontWeight: 800,
-              fontSize: 46,
+              fontSize: 42,
               letterSpacing: 2,
               textTransform: 'uppercase',
               whiteSpace: 'nowrap',
-              background: 'rgba(243,236,220,0.35)',
+              background: 'rgba(243,236,220,0.65)',
               mixBlendMode: 'multiply',
             }}
           >

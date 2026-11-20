@@ -4,6 +4,8 @@ export { FundoDoc, Granulacao, useFontesDoc, surgir, mola, arquivo } from './bas
 export { Arquivo, FotoMoldura } from './Arquivo';
 export { CartaoDocumento, Legenda, Credito } from './Textos';
 export { MapaReal } from './MapaReal';
+export { Mapa3D } from './Mapa3D';
+export type { QuadroCamera3D, Pino3D, Rota3D } from './Mapa3D';
 export { GloboReal } from './GloboReal';
 export { ComparacaoBarras, NumeroGrande, LinhaDoTempo } from './Graficos';
 export { QuadroConexoes } from './QuadroConexoes';

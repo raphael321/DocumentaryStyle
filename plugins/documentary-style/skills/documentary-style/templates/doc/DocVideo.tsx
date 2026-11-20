@@ -4,6 +4,7 @@ import { FundoDoc, arquivo, useFontesDoc } from './base';
 import { Arquivo, FotoMoldura } from './Arquivo';
 import { CartaoDocumento, Credito, Legenda } from './Textos';
 import { MapaReal } from './MapaReal';
+import { Mapa3D } from './Mapa3D';
 import { GloboReal } from './GloboReal';
 import { ComparacaoBarras, LinhaDoTempo, NumeroGrande } from './Graficos';
 import { QuadroConexoes } from './QuadroConexoes';
@@ -18,6 +19,7 @@ export type Bloco = Tempo &
     | { tipo: 'foto'; props: P<typeof FotoMoldura> }
     | { tipo: 'documento'; props: P<typeof CartaoDocumento> }
     | { tipo: 'mapa'; props: P<typeof MapaReal> }
+    | { tipo: 'mapa3d'; props: P<typeof Mapa3D> }
     | { tipo: 'globo'; props: P<typeof GloboReal> }
     | { tipo: 'barras'; props: P<typeof ComparacaoBarras> }
     | { tipo: 'numero'; props: P<typeof NumeroGrande> }
@@ -50,6 +52,7 @@ const RENDER: { [K in Bloco['tipo']]: React.FC<any> } = {
   foto: FotoMoldura,
   documento: CartaoDocumento,
   mapa: MapaReal,
+  mapa3d: Mapa3D,
   globo: GloboReal,
   barras: ComparacaoBarras,
   numero: NumeroGrande,
