@@ -180,6 +180,21 @@ export const conferirPlano = (plano: Plano) => {
     maior = Math.max(maior, atual);
   }
   const avisos: string[] = [];
+  // texto que entra tarde demais no bloco e some no corte (ex.: rótulo do mapa aos 4,2 s num mapa de 4,6 s)
+  plano.cenas.forEach((c) =>
+    c.blocos.forEach((b) => {
+      const dur = b.duracao ?? c.duracao - (b.inicio ?? 0);
+      const p = b.props as Record<string, any>;
+      const textos: [string, number][] = [
+        ...(p.rotulos ?? []).map((r: any) => [`rótulo "${r.texto}"`, r.aos ?? 0]),
+        ...(p.pinos ?? []).filter((x: any) => x.rotulo).map((x: any) => [`pino "${x.rotulo}"`, x.aos ?? 0]),
+        ...(p.nos ?? []).map((x: any) => [`cartão "${x.titulo}"`, x.aos ?? 0]),
+        ...(p.carimbo ? [[`carimbo "${p.carimbo.texto}"`, p.carimbo.aos]] : []),
+      ];
+      for (const [nome, aos] of textos)
+        if (dur - aos < 2) avisos.push(`cena ${c.id}: ${nome} entra aos ${aos.toFixed(1)} s e o bloco acaba aos ${dur.toFixed(1)} s (fica menos de 2 s na tela)`);
+    }),
+  );
   if (fotosVideos < 0.4) avisos.push(`fotos e vídeos reais em só ${Math.round(fotosVideos * 100)}% do tempo (meta: 40 a 60%)`);
   if (maior > 12) avisos.push(`${maior.toFixed(1)} s seguidos sem foto ou vídeo real: intercale material de arquivo`);
   return { duracao: +total.toFixed(1), fotosVideos: Math.round(fotosVideos * 100), real: Math.round(real * 100), maiorTrechoSemArquivo: +maior.toFixed(1), avisos };

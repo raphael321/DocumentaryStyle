@@ -131,6 +131,9 @@ Leia `referencia/acervo.md` antes de baixar qualquer material. Regras que não m
 - Peça permissão ao usuário antes de baixar e diga a fonte e o tamanho.
 
 ### 5. Conferir antes de renderizar tudo
+Rode `conferirPlano(PLANO)` (npx tsx) e resolva os avisos: intercalação com arquivo real e nomes (rótulo, pino,
+cartão, carimbo) que entram a menos de 2 s do corte. Nome tem de ficar pelo menos 2 s na tela: antecipe o `aos`
+ou atrase o próximo bloco.
 Renderize quadros parados de cada cena e **olhe cada um**:
 ```bash
 npx remotion still src/index.ts MeuVideo out/check/f0300.png --frame=300

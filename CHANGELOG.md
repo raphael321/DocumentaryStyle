@@ -1,6 +1,7 @@
 # Changelog
 
 ## 0.2.0 (2026-11-17)
+- `conferirPlano` agora avisa quando um rótulo, pino, cartão ou carimbo entra a menos de 2 s do fim do bloco (o nome some no corte).
 - Novo: **mapa em alta resolução no zoom**. `scripts/baixar-tiles.mjs` baixa blocos de satélite Sentinel-2 cloudless 2016
   (~10 m/px, CC BY 4.0) só no caminho das câmeras do plano (`camerasDoPlano`). O `MapaReal` usa os blocos sozinho
   (prop `satelite`, ligada por padrão), troca para o bloco nítido em cada quadro e põe o crédito no canto.
