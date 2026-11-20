@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // DocumentaryStyle: baixa os mapas reais (domínio público) para public/doc/mapa.
 // uso: node baixar-mapas.mjs <destino> [--hd]
-//   padrão (~13 MB): terra.jpg (NASA 5400x2700), paises-50m.geojson, rios-10m.geojson
+//   padrão (~26 MB): terra.jpg (NASA 5400x2700), paises-50m.geojson, paises-10m.geojson (fronteiras finas p/ cena3d), rios-10m.geojson
 //   --hd  (+27 MB): terra-hd.jpg (NASA 21600x10800), cortada em 32 blocos em hd/ para zoom em país/região
 import fs from 'node:fs';
 import path from 'node:path';
@@ -15,6 +15,7 @@ const NE = 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/maste
 const arquivos = [
   { nome: 'terra.jpg', url: `${NASA}/world.topo.bathy.200408.3x5400x2700.jpg`, credito: 'NASA Earth Observatory, Blue Marble Next Generation (domínio público)' },
   { nome: 'paises-50m.geojson', url: `${NE}/ne_50m_admin_0_countries.geojson`, credito: 'Natural Earth (domínio público)' },
+  { nome: 'paises-10m.geojson', url: `${NE}/ne_10m_admin_0_countries.geojson`, credito: 'Natural Earth (domínio público)' },
   { nome: 'rios-10m.geojson', url: `${NE}/ne_10m_rivers_lake_centerlines.geojson`, credito: 'Natural Earth (domínio público)' },
 ];
 if (hd) arquivos.push({ nome: 'terra-hd.jpg', url: `${NASA}/world.topo.bathy.200408.3x21600x10800.jpg`, credito: 'NASA Earth Observatory, Blue Marble Next Generation (domínio público)' });

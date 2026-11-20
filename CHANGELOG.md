@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.2.0 (2026-11-20)
+- **Mapa real em 3D (`terreno`) é a prioridade**: satélite real (bloco NASA Blue Marble + recorte Sentinel-2 por
+  cima, com emenda suavizada) deitado sobre o relevo real (AWS Terrain Tiles), bordas que se dissolvem no fundo.
+  Pinos, colunas, rotas, fotos e modelos ficam apoiados na altitude real. Fronteira dourada que se desenha
+  (`paises[].modo: 'borda'`, fronteiras Natural Earth 10m).
+- Novo `scripts/baixar-relevo.mjs` (relevo real por região) e `baixar-mapas.mjs` agora baixa `paises-10m.geojson`.
+- **Regra nova: animação = 3D primeiro.** Toda animação do vídeo (lugar, movimento, área atingida, número por lugar,
+  objeto do tema) passa a ser feita com o bloco `cena3d`; o 2D fica para documento, quadro de ligações e casos em
+  que o 3D não serve. O material real de arquivo continua em tela cheia.
+- Novo bloco `cena3d` (`Cena3D.tsx`, Remotion + `@remotion/three` + three.js): país em relevo (Natural Earth) que sobe
+  com mola, áreas translúcidas (enchente, ocupação), colunas, pinos com anel pulsando, arcos de rota com ponta,
+  fotos reais em placas de papel no espaço, modelos .glb, satélite/mapa antigo no chão, título com entrada e saída,
+  neblina, grade e granulação. Câmera em km com órbita e mergulho interpolados.
+- Rótulos 3D em HTML projetado, com fontes grandes (44–54 px a 1080p).
+- `demo3d.ts` (abertura da Watersnoodramp 1953) e `instalar.mjs` avisando das dependências 3D.
+- Testado: prévias de 13,5 s (mapa estilizado e mapa real) renderizadas do começo ao fim (Remotion 4.0.544, three 0.180, `--gl=swangle`).
+
 ## 0.1.2 (2026-11-17)
 - Corrigido: o render do vídeo inteiro caía na cena do mapa com `terra-hd.jpg` (a aba do navegador estourava a memória).
 - Novo `scripts/blocos-hd.mjs`: corta o HD em 32 blocos de 45° (2700 px). `baixar-mapas.mjs --hd` já roda o corte.

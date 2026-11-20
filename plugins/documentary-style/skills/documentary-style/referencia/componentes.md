@@ -46,6 +46,36 @@ rotulos?:  { lon, lat, texto, sub?, aos?, tamanho? }[]
 Ícones prontos: `navio`, `submarino`, `aviao`, `tanque`, `caminhao`, `soldado`, ou o caminho de uma imagem.
 `curva` positiva arqueia para um lado, negativa para o outro.
 
+## cena3d: cena 3D com motion graphics (prioridade para animações)
+Requer `@remotion/three` (mesma versão do `remotion`), `three`, `@react-three/fiber`. Render com `--gl=angle` (ou `swangle`).
+Unidades: **km** a partir de `centro`. Tempos `aos`/`dur`/`t` em segundos desde o início do bloco.
+```ts
+centro: [lon, lat]
+terreno?: {                       // MAPA REAL (prioridade): satélite real sobre relevo real
+  oeste, sul, leste, norte,       // caixa do terreno (maior que o que a câmera vê)
+  satelite: { src, oeste, sul, leste, norte, suavizar? (0.04) }[],   // 1ª = base NASA; seguintes = recortes Sentinel-2 por cima
+  relevo?: 'doc/relevo/<nome>',   // de baixar-relevo.mjs; sem ele o chão fica plano
+  exagero? (12), segmentos? (320), resolucao? (4096), escurecer? (0.12), bordaSuave? (0.08), credito?
+}
+fronteiras?: '10m' | '50m'        // padrão '10m' com terreno
+camera: { t, lon, lat, distancia /*km*/, inclinacao? /*0 = de cima, 75 = rasante; 45*/, giro? /*graus, 0 = olhando o norte*/ }[]
+paises?:  { iso, modo? ('borda' com terreno | 'relevo' sem), borda? (ouro), espessura? (5 px), dur? (1.6), preenchimento? (0),
+            cor?, altura? (4), lateral?, aos? }[]      // borda = fronteira se desenhando no mapa real; relevo = país de papel que sobe
+areas?:   { pontos: [lon,lat][], cor? (azul), altura? (6), base? (0.1), opacidade? (0.78), aos?, dur? (1.4) }[]  // enchente, zona
+colunas?: { lon, lat, valor /*0..1*/, rotulo?, sub?, cor? (ouro), raio? (7), aos? }[]   // altura = valor * alturaColunas
+alturaColunas?: 70
+pinos?:   { lon, lat, rotulo?, sub?, cor? (vermelho), altura? (22), aos? }[]             // cai do alto + anel pulsando
+rotas?:   { pontos: [lon,lat][], aos?, dur? (1.6), cor?, arco? (km; 22% do comprimento), largura? (1.6), ponta? (true) }[]
+fotos?:   { src, lon, lat, largura? (60 km), altura?, elevacao? (8), giro? (omitido = vira para a câmera), legenda?, credito?, aos? }[]
+modelos?: { src (.glb/.gltf), lon, lat, escala? (1), elevacao? (0), giro?, girarPorSeg?, aos? }[]
+chao?:    { src, oeste, sul, leste, norte, escurecer? }   // satélite ou mapa antigo deitado no chão
+titulo?:  { texto, sub?, aos?, ate? }
+neblina? (true), grade? (true), graos? (0.05), fov? (34)
+```
+Com `terreno`, pinos, colunas, rotas, fotos e modelos ficam apoiados na altitude real do ponto.
+Rótulos (pinos, colunas, legendas de foto) são HTML projetado na tela, com as fontes do estilo em tamanho grande
+(44–54 px a 1080p). Créditos das fotos aparecem juntos no canto inferior direito.
+
 ## globo: globo 3D
 `camera: { t, lon, lat, raio }[]` (raio em px: 360 = Terra inteira, 900+ = mergulho),
 `paises?`, `pinos?`, `arcos?: { de, para, aos?, dur?, cor? }[]`, `textura?`.
